@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "erc8004 pre-commit: check + build + typecheck"
+
+pnpm check
+pnpm build
+pnpm typecheck

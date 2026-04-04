@@ -1,0 +1,72 @@
+{
+  "name": "@x402r/erc8004",
+  "version": "0.0.0",
+  "description": "Lightweight TypeScript SDK for ERC-8004 (Trustless Agents) — Identity and Reputation registries",
+  "type": "module",
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.23.0",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./identity": {
+      "types": "./dist/identity/index.d.ts",
+      "default": "./dist/identity/index.js"
+    },
+    "./reputation": {
+      "types": "./dist/reputation/index.d.ts",
+      "default": "./dist/reputation/index.js"
+    },
+    "./abis": {
+      "types": "./dist/abis/index.d.ts",
+      "default": "./dist/abis/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:cov": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "generate": "wagmi generate",
+    "check": "biome check",
+    "format": "biome check --write",
+    "prepublishOnly": "publint --strict && attw --pack --ignore-rules no-resolution cjs-resolves-to-esm"
+  },
+  "peerDependencies": {
+    "viem": "^2.0.0"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.2",
+    "@biomejs/biome": "^2.4.10",
+    "@size-limit/file": "^12.0.1",
+    "@vitest/coverage-v8": "^4.1.2",
+    "@wagmi/cli": "^2.10.0",
+    "knip": "^6.3.0",
+    "publint": "^0.3.18",
+    "size-limit": "^12.0.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "viem": "^2.47.10",
+    "vitest": "^4.1.2"
+  },
+  "keywords": [
+    "erc-8004",
+    "erc8004",
+    "trustless-agents",
+    "identity",
+    "reputation",
+    "viem",
+    "ethereum",
+    "base"
+  ]
+}

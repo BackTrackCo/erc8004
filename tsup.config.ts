@@ -1,0 +1,14 @@
+import { defineConfig } from 'tsup'
+
+export default defineConfig({
+  entry: {
+    index: 'src/index.ts',
+    'identity/index': 'src/identity/index.ts',
+    'reputation/index': 'src/reputation/index.ts',
+    'abis/index': 'src/abis/index.ts',
+  },
+  format: ['esm'],
+  dts: true,
+  sourcemap: true,
+  clean: true,
+})
