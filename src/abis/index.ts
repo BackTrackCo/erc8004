@@ -1,1 +1,1 @@
-export { identityRegistryAbi, reputationRegistryAbi } from './generated.js'
+export { identityRegistryAbi, reputationRegistryAbi } from './erc8004.js'

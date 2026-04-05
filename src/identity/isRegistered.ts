@@ -13,13 +13,6 @@ export async function isRegistered(
 ): Promise<boolean> {
   const { registryAddress, address } = parameters
 
-  if (!address) {
-    throw new Error('address is required')
-  }
-  if (!registryAddress) {
-    throw new Error('registryAddress is required')
-  }
-
   const balance = await publicClient.readContract({
     address: registryAddress,
     abi: identityRegistryAbi,

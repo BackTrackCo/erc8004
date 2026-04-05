@@ -8,7 +8,6 @@ export {
 export type {
   IsRegisteredParameters,
   RegisterAgentParameters,
-  RegisterAgentWithMetadataParameters,
 } from './identity/index.js'
 export { isRegistered, registerAgent } from './identity/index.js'
 export type { Erc8004Addresses } from './types.js'

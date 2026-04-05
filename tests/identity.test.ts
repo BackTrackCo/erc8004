@@ -29,53 +29,9 @@ describe('isRegistered', () => {
 
     expect(result).toBe(false)
   })
-
-  it('throws on empty address', async () => {
-    const client = {} as unknown as PublicClient
-
-    await expect(
-      isRegistered(client, {
-        registryAddress: '0x8004A169FB4a3325136EB29fA0ceB6D2e539a432',
-        address: '' as `0x${string}`,
-      }),
-    ).rejects.toThrow('address is required')
-  })
-
-  it('throws on empty registryAddress', async () => {
-    const client = {} as unknown as PublicClient
-
-    await expect(
-      isRegistered(client, {
-        registryAddress: '' as `0x${string}`,
-        address: '0x1234567890123456789012345678901234567890',
-      }),
-    ).rejects.toThrow('registryAddress is required')
-  })
 })
 
 describe('registerAgent', () => {
-  it('throws on empty agentURI', async () => {
-    const client = {} as unknown as WalletClient
-
-    await expect(
-      registerAgent(client, {
-        registryAddress: '0x8004A169FB4a3325136EB29fA0ceB6D2e539a432',
-        agentURI: '',
-      }),
-    ).rejects.toThrow('agentURI is required')
-  })
-
-  it('throws on empty registryAddress', async () => {
-    const client = {} as unknown as WalletClient
-
-    await expect(
-      registerAgent(client, {
-        registryAddress: '' as `0x${string}`,
-        agentURI: 'https://example.com/agent.json',
-      }),
-    ).rejects.toThrow('registryAddress is required')
-  })
-
   it('throws when walletClient has no account', async () => {
     const client = {
       account: undefined,
@@ -89,7 +45,7 @@ describe('registerAgent', () => {
     ).rejects.toThrow('walletClient must have an account')
   })
 
-  it('propagates writeContract rejection with context', async () => {
+  it('propagates writeContract rejection', async () => {
     const client = {
       writeContract: vi.fn().mockRejectedValue(new Error('execution reverted')),
       chain: { id: 8453 },
@@ -125,6 +81,27 @@ describe('registerAgent', () => {
           'https://example.com/agent.json',
           [{ metadataKey: 'x402r.operators', metadataValue: '0xabcd' }],
         ],
+      }),
+    )
+  })
+
+  it('uses no-metadata overload when metadata is empty array', async () => {
+    const txHash = '0xabc123' as `0x${string}`
+    const client = {
+      writeContract: vi.fn().mockResolvedValue(txHash),
+      chain: { id: 8453 },
+      account: { address: '0x1234567890123456789012345678901234567890' },
+    } as unknown as WalletClient
+
+    await registerAgent(client, {
+      registryAddress: '0x8004A169FB4a3325136EB29fA0ceB6D2e539a432',
+      agentURI: 'https://example.com/agent.json',
+      metadata: [],
+    })
+
+    expect(client.writeContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        args: ['https://example.com/agent.json'],
       }),
     )
   })

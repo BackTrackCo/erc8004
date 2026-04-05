@@ -1,9 +1,6 @@
 import type { Hash, WalletClient } from 'viem'
 import { identityRegistryAbi } from '../abis/index.js'
-import type {
-  RegisterAgentParameters,
-  RegisterAgentWithMetadataParameters,
-} from './types.js'
+import type { RegisterAgentParameters } from './types.js'
 
 /**
  * Register as an ERC-8004 agent. Mints an agent NFT (ERC-721) to the caller.
@@ -12,30 +9,24 @@ import type {
  */
 export async function registerAgent(
   walletClient: WalletClient,
-  parameters: RegisterAgentParameters | RegisterAgentWithMetadataParameters,
+  parameters: RegisterAgentParameters,
 ): Promise<Hash> {
-  const { registryAddress, agentURI } = parameters
+  const { registryAddress, agentURI, metadata } = parameters
 
-  if (!agentURI) {
-    throw new Error('agentURI is required')
-  }
-  if (!registryAddress) {
-    throw new Error('registryAddress is required')
-  }
   if (!walletClient.account) {
     throw new Error(
       'walletClient must have an account — use a walletClient with a connected account',
     )
   }
 
-  if ('metadata' in parameters && parameters.metadata.length > 0) {
+  if (metadata && metadata.length > 0) {
     return walletClient.writeContract({
       address: registryAddress,
       abi: identityRegistryAbi,
       functionName: 'register',
       args: [
         agentURI,
-        parameters.metadata.map((m) => ({
+        metadata.map((m) => ({
           metadataKey: m.key,
           metadataValue: m.value,
         })),

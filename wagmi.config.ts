@@ -3,7 +3,7 @@ import { etherscan } from '@wagmi/cli/plugins'
 import { base } from 'viem/chains'
 
 export default defineConfig({
-  out: 'src/abis/generated.ts',
+  out: 'src/abis/basescan-generated.ts',
   plugins: [
     etherscan({
       apiKey: process.env.BASESCAN_API_KEY ?? '',

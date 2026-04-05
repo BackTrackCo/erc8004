@@ -1,6 +1,7 @@
 // Canonical ABIs from erc-8004/erc-8004-contracts repo (Hardhat compilation output).
 // Source: https://github.com/erc-8004/erc-8004-contracts/tree/main/abis
-// To detect ABI drift, compare with Basescan verified contract: pnpm generate (requires BASESCAN_API_KEY)
+// NOT auto-generated — fetched manually from the canonical contracts repo.
+// wagmi.config.ts can cross-check against Basescan: pnpm generate (requires BASESCAN_API_KEY)
 
 export const identityRegistryAbi = [
   {
