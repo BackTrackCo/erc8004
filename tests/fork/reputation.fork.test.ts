@@ -66,7 +66,7 @@ describe('Reputation Registry (fork)', () => {
       agentId,
       clientAddress: accounts[1].address,
     })
-    expect(index).toBeGreaterThan(0n)
+    expect(index).toBe(1n)
   })
 
   it('readFeedback returns the submitted feedback', async () => {
@@ -95,7 +95,7 @@ describe('Reputation Registry (fork)', () => {
       tag2: 'quality',
     })
 
-    expect(summary.count).toBeGreaterThan(0n)
+    expect(summary.count).toBe(1n)
     expect(summary.summaryValue).toBe(85n)
   })
 
@@ -112,7 +112,7 @@ describe('Reputation Registry (fork)', () => {
     expect(entries[0].client.toLowerCase()).toBe(
       accounts[1].address.toLowerCase(),
     )
-    expect(entries[0].feedbackIndex).toBeGreaterThan(0n)
+    expect(entries[0].feedbackIndex).toBe(1n)
     expect(entries[0].value).toBe(85n)
     expect(entries[0].valueDecimals).toBe(0)
     expect(entries[0].tag1).toBe('x402r.resolution')
@@ -150,7 +150,7 @@ describe('Reputation Registry (fork)', () => {
       responders: [accounts[0].address],
     })
 
-    expect(count).toBeGreaterThan(0n)
+    expect(count).toBe(1n)
   })
 
   it('revokeFeedback marks feedback as revoked', async () => {
@@ -172,5 +172,30 @@ describe('Reputation Registry (fork)', () => {
       feedbackIndex: lastIndex,
     })
     expect(feedback.isRevoked).toBe(true)
+  })
+
+  it('readAllFeedback excludes revoked when includeRevoked is false', async () => {
+    const entries = await readAllFeedback(publicClient, {
+      agentId,
+      clientAddresses: [accounts[1].address],
+      tag1: 'x402r.resolution',
+      tag2: 'quality',
+      includeRevoked: false,
+    })
+
+    expect(entries).toHaveLength(0)
+  })
+
+  it('readAllFeedback includes revoked when includeRevoked is true', async () => {
+    const entries = await readAllFeedback(publicClient, {
+      agentId,
+      clientAddresses: [accounts[1].address],
+      tag1: 'x402r.resolution',
+      tag2: 'quality',
+      includeRevoked: true,
+    })
+
+    expect(entries).toHaveLength(1)
+    expect(entries[0].isRevoked).toBe(true)
   })
 })

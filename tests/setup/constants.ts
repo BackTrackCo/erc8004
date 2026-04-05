@@ -21,17 +21,10 @@ export const accounts: readonly TestAccount[] = [
     privateKey:
       '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
   },
-  {
-    address: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
-    privateKey:
-      '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a',
-  },
 ] as const
 
 // ---------------------------------------------------------------------------
 // Pool ID for parallel test isolation
 // ---------------------------------------------------------------------------
 
-export const poolId =
-  Number(process.env.VITEST_POOL_ID ?? 1) *
-  Number(process.env.VITEST_SHARD_ID ?? 1)
+export const poolId = Number(process.env.VITEST_POOL_ID ?? 1)

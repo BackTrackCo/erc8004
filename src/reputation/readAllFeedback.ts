@@ -33,7 +33,7 @@ export async function readAllFeedback(
     functionName: 'readAllFeedback',
     args: [
       parameters.agentId,
-      [...parameters.clientAddresses],
+      parameters.clientAddresses,
       parameters.tag1,
       parameters.tag2,
       parameters.includeRevoked,

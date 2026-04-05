@@ -1,4 +1,5 @@
 import type { PublicClient } from 'viem'
+import { zeroHash } from 'viem'
 import { describe, expect, it, vi } from 'vitest'
 import { appendResponse } from '../src/reputation/appendResponse.js'
 import { getClients } from '../src/reputation/getClients.js'
@@ -17,9 +18,6 @@ import {
   REPUTATION_REGISTRY,
 } from './setup/mocks.js'
 
-const ZERO_HASH =
-  '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`
-
 // --- giveFeedback ---
 
 describe('giveFeedback', () => {
@@ -34,7 +32,7 @@ describe('giveFeedback', () => {
         tag2: 'quality',
         endpoint: '',
         feedbackURI: '',
-        feedbackHash: ZERO_HASH,
+        feedbackHash: zeroHash,
       }),
     ).rejects.toThrow('walletClient must have an account')
   })
@@ -50,7 +48,7 @@ describe('giveFeedback', () => {
       tag2: 'quality',
       endpoint: 'https://api.example.com',
       feedbackURI: 'https://feedback.example.com',
-      feedbackHash: ZERO_HASH,
+      feedbackHash: zeroHash,
     })
 
     expect(client.writeContract).toHaveBeenCalledWith(
@@ -64,7 +62,7 @@ describe('giveFeedback', () => {
           'quality',
           'https://api.example.com',
           'https://feedback.example.com',
-          ZERO_HASH,
+          zeroHash,
         ],
       }),
     )
@@ -112,7 +110,7 @@ describe('appendResponse', () => {
         clientAddress: ADDR_B,
         feedbackIndex: 1n,
         responseURI: 'https://response.example.com',
-        responseHash: ZERO_HASH,
+        responseHash: zeroHash,
       }),
     ).rejects.toThrow('walletClient must have an account')
   })
@@ -125,13 +123,13 @@ describe('appendResponse', () => {
       clientAddress: ADDR_B,
       feedbackIndex: 1n,
       responseURI: 'https://response.example.com',
-      responseHash: ZERO_HASH,
+      responseHash: zeroHash,
     })
 
     expect(client.writeContract).toHaveBeenCalledWith(
       expect.objectContaining({
         functionName: 'appendResponse',
-        args: [42n, ADDR_B, 1n, 'https://response.example.com', ZERO_HASH],
+        args: [42n, ADDR_B, 1n, 'https://response.example.com', zeroHash],
       }),
     )
   })

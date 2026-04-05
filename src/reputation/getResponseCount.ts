@@ -24,7 +24,7 @@ export async function getResponseCount(
       parameters.agentId,
       parameters.clientAddress,
       parameters.feedbackIndex,
-      [...parameters.responders],
+      parameters.responders,
     ],
   })
 }
