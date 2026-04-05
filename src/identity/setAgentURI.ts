@@ -1,5 +1,6 @@
 import type { Hash, WalletClient } from 'viem'
 import { identityRegistryAbi } from '../abis/index.js'
+import { requireAccount } from './requireAccount.js'
 import type { SetAgentURIParameters } from './types.js'
 
 /**
@@ -11,12 +12,7 @@ export async function setAgentURI(
   parameters: SetAgentURIParameters,
 ): Promise<Hash> {
   const { registryAddress, agentId, newURI } = parameters
-
-  if (!walletClient.account) {
-    throw new Error(
-      'walletClient must have an account — use a walletClient with a connected account',
-    )
-  }
+  const account = requireAccount(walletClient)
 
   return walletClient.writeContract({
     address: registryAddress,
@@ -24,6 +20,6 @@ export async function setAgentURI(
     functionName: 'setAgentURI',
     args: [agentId, newURI],
     chain: walletClient.chain,
-    account: walletClient.account,
+    account,
   })
 }
