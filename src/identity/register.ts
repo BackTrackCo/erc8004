@@ -22,6 +22,11 @@ export async function registerAgent(
   if (!registryAddress) {
     throw new Error('registryAddress is required')
   }
+  if (!walletClient.account) {
+    throw new Error(
+      'walletClient must have an account — use a walletClient with a connected account',
+    )
+  }
 
   if ('metadata' in parameters && parameters.metadata.length > 0) {
     return walletClient.writeContract({
@@ -36,7 +41,7 @@ export async function registerAgent(
         })),
       ],
       chain: walletClient.chain,
-      account: walletClient.account!,
+      account: walletClient.account,
     })
   }
 
@@ -46,6 +51,6 @@ export async function registerAgent(
     functionName: 'register',
     args: [agentURI],
     chain: walletClient.chain,
-    account: walletClient.account!,
+    account: walletClient.account,
   })
 }

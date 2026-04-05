@@ -1,9 +1,493 @@
-// Auto-generated from ERC-8004 deployed contracts on Base mainnet.
-// Source: agent0-sdk v1.7.1 (cross-reference for ABI correctness).
-// Regenerate with: pnpm generate (requires BASESCAN_API_KEY)
+// Canonical ABIs from erc-8004/erc-8004-contracts repo (Hardhat compilation output).
+// Source: https://github.com/erc-8004/erc-8004-contracts/tree/main/abis
+// To detect ABI drift, compare with Basescan verified contract: pnpm generate (requires BASESCAN_API_KEY)
 
 export const identityRegistryAbi = [
-  // ERC-721 balanceOf (not in agent0-sdk export, but present on deployed contract)
+  {
+    inputs: [],
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'target',
+        type: 'address',
+      },
+    ],
+    name: 'AddressEmptyCode',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'ECDSAInvalidSignature',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'length',
+        type: 'uint256',
+      },
+    ],
+    name: 'ECDSAInvalidSignatureLength',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: 's',
+        type: 'bytes32',
+      },
+    ],
+    name: 'ECDSAInvalidSignatureS',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'implementation',
+        type: 'address',
+      },
+    ],
+    name: 'ERC1967InvalidImplementation',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'ERC1967NonPayable',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'sender',
+        type: 'address',
+      },
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+      {
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
+    ],
+    name: 'ERC721IncorrectOwner',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'operator',
+        type: 'address',
+      },
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'ERC721InsufficientApproval',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'approver',
+        type: 'address',
+      },
+    ],
+    name: 'ERC721InvalidApprover',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'operator',
+        type: 'address',
+      },
+    ],
+    name: 'ERC721InvalidOperator',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
+    ],
+    name: 'ERC721InvalidOwner',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'receiver',
+        type: 'address',
+      },
+    ],
+    name: 'ERC721InvalidReceiver',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'sender',
+        type: 'address',
+      },
+    ],
+    name: 'ERC721InvalidSender',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'ERC721NonexistentToken',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'FailedCall',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'InvalidInitialization',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'NotInitializing',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
+    ],
+    name: 'OwnableInvalidOwner',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'account',
+        type: 'address',
+      },
+    ],
+    name: 'OwnableUnauthorizedAccount',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'UUPSUnauthorizedCallContext',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: 'slot',
+        type: 'bytes32',
+      },
+    ],
+    name: 'UUPSUnsupportedProxiableUUID',
+    type: 'error',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'approved',
+        type: 'address',
+      },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'Approval',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'operator',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'bool',
+        name: 'approved',
+        type: 'bool',
+      },
+    ],
+    name: 'ApprovalForAll',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: '_fromTokenId',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: '_toTokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'BatchMetadataUpdate',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [],
+    name: 'EIP712DomainChanged',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'uint64',
+        name: 'version',
+        type: 'uint64',
+      },
+    ],
+    name: 'Initialized',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
+      },
+      {
+        indexed: true,
+        internalType: 'string',
+        name: 'indexedMetadataKey',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'metadataKey',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'bytes',
+        name: 'metadataValue',
+        type: 'bytes',
+      },
+    ],
+    name: 'MetadataSet',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: '_tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'MetadataUpdate',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'previousOwner',
+        type: 'address',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'newOwner',
+        type: 'address',
+      },
+    ],
+    name: 'OwnershipTransferred',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'agentURI',
+        type: 'string',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
+    ],
+    name: 'Registered',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'from',
+        type: 'address',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'to',
+        type: 'address',
+      },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'Transfer',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'newURI',
+        type: 'string',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'updatedBy',
+        type: 'address',
+      },
+    ],
+    name: 'URIUpdated',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'implementation',
+        type: 'address',
+      },
+    ],
+    name: 'Upgraded',
+    type: 'event',
+  },
+  {
+    inputs: [],
+    name: 'UPGRADE_INTERFACE_VERSION',
+    outputs: [
+      {
+        internalType: 'string',
+        name: '',
+        type: 'string',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'to',
+        type: 'address',
+      },
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'approve',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
   {
     inputs: [
       {
@@ -18,159 +502,6 @@ export const identityRegistryAbi = [
         internalType: 'uint256',
         name: '',
         type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
-    ],
-    name: 'ownerOf',
-    outputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'owner',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'operator',
-        type: 'address',
-      },
-    ],
-    name: 'isApprovedForAll',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
-    ],
-    name: 'getApproved',
-    outputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'from',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
-    ],
-    name: 'transferFrom',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-      {
-        internalType: 'bool',
-        name: 'approved',
-        type: 'bool',
-      },
-    ],
-    name: 'setApprovalForAll',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-    ],
-    name: 'approve',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
-    ],
-    name: 'tokenURI',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'DOMAIN_SEPARATOR',
-    outputs: [
-      {
-        internalType: 'bytes32',
-        name: '',
-        type: 'bytes32',
       },
     ],
     stateMutability: 'view',
@@ -220,26 +551,171 @@ export const identityRegistryAbi = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'register',
-    outputs: [
+    inputs: [
       {
         internalType: 'uint256',
         name: 'agentId',
         type: 'uint256',
       },
     ],
+    name: 'getAgentWallet',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'getApproved',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
+      },
+      {
+        internalType: 'string',
+        name: 'metadataKey',
+        type: 'string',
+      },
+    ],
+    name: 'getMetadata',
+    outputs: [
+      {
+        internalType: 'bytes',
+        name: '',
+        type: 'bytes',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getVersion',
+    outputs: [
+      {
+        internalType: 'string',
+        name: '',
+        type: 'string',
+      },
+    ],
+    stateMutability: 'pure',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'initialize',
+    outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
   },
   {
     inputs: [
       {
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
+      {
+        internalType: 'address',
+        name: 'operator',
+        type: 'address',
+      },
+    ],
+    name: 'isApprovedForAll',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'name',
+    outputs: [
+      {
         internalType: 'string',
-        name: 'agentURI',
+        name: '',
         type: 'string',
       },
     ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'owner',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'ownerOf',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'proxiableUUID',
+    outputs: [
+      {
+        internalType: 'bytes32',
+        name: '',
+        type: 'bytes32',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
     name: 'register',
     outputs: [
       {
@@ -290,46 +766,76 @@ export const identityRegistryAbi = [
   {
     inputs: [
       {
+        internalType: 'string',
+        name: 'agentURI',
+        type: 'string',
+      },
+    ],
+    name: 'register',
+    outputs: [
+      {
         internalType: 'uint256',
         name: 'agentId',
         type: 'uint256',
       },
-      {
-        internalType: 'string',
-        name: 'key',
-        type: 'string',
-      },
     ],
-    name: 'getMetadata',
-    outputs: [
-      {
-        internalType: 'bytes',
-        name: '',
-        type: 'bytes',
-      },
-    ],
-    stateMutability: 'view',
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
     inputs: [
       {
+        internalType: 'address',
+        name: 'from',
+        type: 'address',
+      },
+      {
+        internalType: 'address',
+        name: 'to',
+        type: 'address',
+      },
+      {
         internalType: 'uint256',
-        name: 'agentId',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'safeTransferFrom',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'from',
+        type: 'address',
+      },
+      {
+        internalType: 'address',
+        name: 'to',
+        type: 'address',
+      },
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
         type: 'uint256',
       },
       {
-        internalType: 'string',
-        name: 'key',
-        type: 'string',
-      },
-      {
         internalType: 'bytes',
-        name: 'value',
+        name: 'data',
         type: 'bytes',
       },
     ],
-    name: 'setMetadata',
+    name: 'safeTransferFrom',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -383,6 +889,134 @@ export const identityRegistryAbi = [
   {
     inputs: [
       {
+        internalType: 'address',
+        name: 'operator',
+        type: 'address',
+      },
+      {
+        internalType: 'bool',
+        name: 'approved',
+        type: 'bool',
+      },
+    ],
+    name: 'setApprovalForAll',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
+      },
+      {
+        internalType: 'string',
+        name: 'metadataKey',
+        type: 'string',
+      },
+      {
+        internalType: 'bytes',
+        name: 'metadataValue',
+        type: 'bytes',
+      },
+    ],
+    name: 'setMetadata',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes4',
+        name: 'interfaceId',
+        type: 'bytes4',
+      },
+    ],
+    name: 'supportsInterface',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'symbol',
+    outputs: [
+      {
+        internalType: 'string',
+        name: '',
+        type: 'string',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'tokenURI',
+    outputs: [
+      {
+        internalType: 'string',
+        name: '',
+        type: 'string',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'from',
+        type: 'address',
+      },
+      {
+        internalType: 'address',
+        name: 'to',
+        type: 'address',
+      },
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'transferFrom',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'newOwner',
+        type: 'address',
+      },
+    ],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
         internalType: 'uint256',
         name: 'agentId',
         type: 'uint256',
@@ -396,106 +1030,360 @@ export const identityRegistryAbi = [
   {
     inputs: [
       {
+        internalType: 'address',
+        name: 'newImplementation',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes',
+        name: 'data',
+        type: 'bytes',
+      },
+    ],
+    name: 'upgradeToAndCall',
+    outputs: [],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+] as const
+
+export const reputationRegistryAbi = [
+  {
+    inputs: [],
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'target',
+        type: 'address',
+      },
+    ],
+    name: 'AddressEmptyCode',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'implementation',
+        type: 'address',
+      },
+    ],
+    name: 'ERC1967InvalidImplementation',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'ERC1967NonPayable',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'FailedCall',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'InvalidInitialization',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'NotInitializing',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
+    ],
+    name: 'OwnableInvalidOwner',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'account',
+        type: 'address',
+      },
+    ],
+    name: 'OwnableUnauthorizedAccount',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'UUPSUnauthorizedCallContext',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: 'slot',
+        type: 'bytes32',
+      },
+    ],
+    name: 'UUPSUnsupportedProxiableUUID',
+    type: 'error',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
         internalType: 'uint256',
         name: 'agentId',
         type: 'uint256',
       },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'clientAddress',
+        type: 'address',
+      },
+      {
+        indexed: true,
+        internalType: 'uint64',
+        name: 'feedbackIndex',
+        type: 'uint64',
+      },
     ],
-    name: 'getAgentWallet',
+    name: 'FeedbackRevoked',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'uint64',
+        name: 'version',
+        type: 'uint64',
+      },
+    ],
+    name: 'Initialized',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'clientAddress',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'uint64',
+        name: 'feedbackIndex',
+        type: 'uint64',
+      },
+      {
+        indexed: false,
+        internalType: 'int128',
+        name: 'value',
+        type: 'int128',
+      },
+      {
+        indexed: false,
+        internalType: 'uint8',
+        name: 'valueDecimals',
+        type: 'uint8',
+      },
+      {
+        indexed: true,
+        internalType: 'string',
+        name: 'indexedTag1',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'tag1',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'tag2',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'endpoint',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'feedbackURI',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'bytes32',
+        name: 'feedbackHash',
+        type: 'bytes32',
+      },
+    ],
+    name: 'NewFeedback',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'previousOwner',
+        type: 'address',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'newOwner',
+        type: 'address',
+      },
+    ],
+    name: 'OwnershipTransferred',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'clientAddress',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'uint64',
+        name: 'feedbackIndex',
+        type: 'uint64',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'responder',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'responseURI',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'bytes32',
+        name: 'responseHash',
+        type: 'bytes32',
+      },
+    ],
+    name: 'ResponseAppended',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'implementation',
+        type: 'address',
+      },
+    ],
+    name: 'Upgraded',
+    type: 'event',
+  },
+  {
+    inputs: [],
+    name: 'UPGRADE_INTERFACE_VERSION',
     outputs: [
       {
-        internalType: 'address',
+        internalType: 'string',
         name: '',
-        type: 'address',
+        type: 'string',
       },
     ],
     stateMutability: 'view',
     type: 'function',
   },
   {
-    anonymous: false,
     inputs: [
       {
-        indexed: true,
         internalType: 'uint256',
         name: 'agentId',
         type: 'uint256',
       },
       {
-        indexed: false,
-        internalType: 'string',
-        name: 'agentURI',
-        type: 'string',
-      },
-      {
-        indexed: true,
         internalType: 'address',
-        name: 'owner',
+        name: 'clientAddress',
         type: 'address',
       },
+      {
+        internalType: 'uint64',
+        name: 'feedbackIndex',
+        type: 'uint64',
+      },
+      {
+        internalType: 'string',
+        name: 'responseURI',
+        type: 'string',
+      },
+      {
+        internalType: 'bytes32',
+        name: 'responseHash',
+        type: 'bytes32',
+      },
     ],
-    name: 'Registered',
-    type: 'event',
+    name: 'appendResponse',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
   },
   {
-    anonymous: false,
     inputs: [
       {
-        indexed: true,
         internalType: 'uint256',
         name: 'agentId',
         type: 'uint256',
       },
+    ],
+    name: 'getClients',
+    outputs: [
       {
-        indexed: false,
-        internalType: 'string',
-        name: 'newURI',
-        type: 'string',
-      },
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'updatedBy',
-        type: 'address',
+        internalType: 'address[]',
+        name: '',
+        type: 'address[]',
       },
     ],
-    name: 'URIUpdated',
-    type: 'event',
+    stateMutability: 'view',
+    type: 'function',
   },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'uint256',
-        name: 'agentId',
-        type: 'uint256',
-      },
-      {
-        indexed: true,
-        internalType: 'string',
-        name: 'indexedMetadataKey',
-        type: 'string',
-      },
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'metadataKey',
-        type: 'string',
-      },
-      {
-        indexed: false,
-        internalType: 'bytes',
-        name: 'metadataValue',
-        type: 'bytes',
-      },
-    ],
-    name: 'MetadataSet',
-    type: 'event',
-  },
-] as const
-
-export const reputationRegistryAbi = [
   {
     inputs: [],
     name: 'getIdentityRegistry',
@@ -507,6 +1395,121 @@ export const reputationRegistryAbi = [
       },
     ],
     stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
+      },
+      {
+        internalType: 'address',
+        name: 'clientAddress',
+        type: 'address',
+      },
+    ],
+    name: 'getLastIndex',
+    outputs: [
+      {
+        internalType: 'uint64',
+        name: '',
+        type: 'uint64',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
+      },
+      {
+        internalType: 'address',
+        name: 'clientAddress',
+        type: 'address',
+      },
+      {
+        internalType: 'uint64',
+        name: 'feedbackIndex',
+        type: 'uint64',
+      },
+      {
+        internalType: 'address[]',
+        name: 'responders',
+        type: 'address[]',
+      },
+    ],
+    name: 'getResponseCount',
+    outputs: [
+      {
+        internalType: 'uint64',
+        name: 'count',
+        type: 'uint64',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
+      },
+      {
+        internalType: 'address[]',
+        name: 'clientAddresses',
+        type: 'address[]',
+      },
+      {
+        internalType: 'string',
+        name: 'tag1',
+        type: 'string',
+      },
+      {
+        internalType: 'string',
+        name: 'tag2',
+        type: 'string',
+      },
+    ],
+    name: 'getSummary',
+    outputs: [
+      {
+        internalType: 'uint64',
+        name: 'count',
+        type: 'uint64',
+      },
+      {
+        internalType: 'int128',
+        name: 'summaryValue',
+        type: 'int128',
+      },
+      {
+        internalType: 'uint8',
+        name: 'summaryValueDecimals',
+        type: 'uint8',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getVersion',
+    outputs: [
+      {
+        internalType: 'string',
+        name: '',
+        type: 'string',
+      },
+    ],
+    stateMutability: 'pure',
     type: 'function',
   },
   {
@@ -560,166 +1563,37 @@ export const reputationRegistryAbi = [
   {
     inputs: [
       {
-        internalType: 'uint256',
-        name: 'agentId',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint64',
-        name: 'feedbackIndex',
-        type: 'uint64',
+        internalType: 'address',
+        name: 'identityRegistry_',
+        type: 'address',
       },
     ],
-    name: 'revokeFeedback',
+    name: 'initialize',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'agentId',
-        type: 'uint256',
-      },
+    inputs: [],
+    name: 'owner',
+    outputs: [
       {
         internalType: 'address',
-        name: 'clientAddress',
+        name: '',
         type: 'address',
       },
-      {
-        internalType: 'uint64',
-        name: 'feedbackIndex',
-        type: 'uint64',
-      },
-      {
-        internalType: 'string',
-        name: 'responseURI',
-        type: 'string',
-      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'proxiableUUID',
+    outputs: [
       {
         internalType: 'bytes32',
-        name: 'responseHash',
-        type: 'bytes32',
-      },
-    ],
-    name: 'appendResponse',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'agentId',
-        type: 'uint256',
-      },
-      {
-        internalType: 'address',
-        name: 'clientAddress',
-        type: 'address',
-      },
-    ],
-    name: 'getLastIndex',
-    outputs: [
-      {
-        internalType: 'uint64',
         name: '',
-        type: 'uint64',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'agentId',
-        type: 'uint256',
-      },
-      {
-        internalType: 'address',
-        name: 'clientAddress',
-        type: 'address',
-      },
-      {
-        internalType: 'uint64',
-        name: 'feedbackIndex',
-        type: 'uint64',
-      },
-    ],
-    name: 'readFeedback',
-    outputs: [
-      {
-        internalType: 'int128',
-        name: 'value',
-        type: 'int128',
-      },
-      {
-        internalType: 'uint8',
-        name: 'valueDecimals',
-        type: 'uint8',
-      },
-      {
-        internalType: 'string',
-        name: 'tag1',
-        type: 'string',
-      },
-      {
-        internalType: 'string',
-        name: 'tag2',
-        type: 'string',
-      },
-      {
-        internalType: 'bool',
-        name: 'isRevoked',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'agentId',
-        type: 'uint256',
-      },
-      {
-        internalType: 'address[]',
-        name: 'clientAddresses',
-        type: 'address[]',
-      },
-      {
-        internalType: 'string',
-        name: 'tag1',
-        type: 'string',
-      },
-      {
-        internalType: 'string',
-        name: 'tag2',
-        type: 'string',
-      },
-    ],
-    name: 'getSummary',
-    outputs: [
-      {
-        internalType: 'uint64',
-        name: 'count',
-        type: 'uint64',
-      },
-      {
-        internalType: 'int128',
-        name: 'summaryValue',
-        type: 'int128',
-      },
-      {
-        internalType: 'uint8',
-        name: 'summaryValueDecimals',
-        type: 'uint8',
+        type: 'bytes32',
       },
     ],
     stateMutability: 'view',
@@ -801,114 +1675,102 @@ export const reputationRegistryAbi = [
         name: 'agentId',
         type: 'uint256',
       },
+      {
+        internalType: 'address',
+        name: 'clientAddress',
+        type: 'address',
+      },
+      {
+        internalType: 'uint64',
+        name: 'feedbackIndex',
+        type: 'uint64',
+      },
     ],
-    name: 'getClients',
+    name: 'readFeedback',
     outputs: [
       {
-        internalType: 'address[]',
-        name: '',
-        type: 'address[]',
+        internalType: 'int128',
+        name: 'value',
+        type: 'int128',
+      },
+      {
+        internalType: 'uint8',
+        name: 'valueDecimals',
+        type: 'uint8',
+      },
+      {
+        internalType: 'string',
+        name: 'tag1',
+        type: 'string',
+      },
+      {
+        internalType: 'string',
+        name: 'tag2',
+        type: 'string',
+      },
+      {
+        internalType: 'bool',
+        name: 'isRevoked',
+        type: 'bool',
       },
     ],
     stateMutability: 'view',
     type: 'function',
   },
   {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'uint256',
-        name: 'agentId',
-        type: 'uint256',
-      },
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'clientAddress',
-        type: 'address',
-      },
-      {
-        indexed: false,
-        internalType: 'uint64',
-        name: 'feedbackIndex',
-        type: 'uint64',
-      },
-      {
-        indexed: false,
-        internalType: 'int128',
-        name: 'value',
-        type: 'int128',
-      },
-      {
-        indexed: false,
-        internalType: 'uint8',
-        name: 'valueDecimals',
-        type: 'uint8',
-      },
-      {
-        indexed: true,
-        internalType: 'string',
-        name: 'indexedTag1',
-        type: 'string',
-      },
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'tag1',
-        type: 'string',
-      },
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'tag2',
-        type: 'string',
-      },
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'endpoint',
-        type: 'string',
-      },
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'feedbackURI',
-        type: 'string',
-      },
-      {
-        indexed: false,
-        internalType: 'bytes32',
-        name: 'feedbackHash',
-        type: 'bytes32',
-      },
-    ],
-    name: 'NewFeedback',
-    type: 'event',
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
   },
   {
-    anonymous: false,
     inputs: [
       {
-        indexed: true,
         internalType: 'uint256',
         name: 'agentId',
         type: 'uint256',
       },
       {
-        indexed: true,
-        internalType: 'address',
-        name: 'clientAddress',
-        type: 'address',
-      },
-      {
-        indexed: true,
         internalType: 'uint64',
         name: 'feedbackIndex',
         type: 'uint64',
       },
     ],
-    name: 'FeedbackRevoked',
-    type: 'event',
+    name: 'revokeFeedback',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'newOwner',
+        type: 'address',
+      },
+    ],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'newImplementation',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes',
+        name: 'data',
+        type: 'bytes',
+      },
+    ],
+    name: 'upgradeToAndCall',
+    outputs: [],
+    stateMutability: 'payable',
+    type: 'function',
   },
 ] as const

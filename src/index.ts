@@ -1,4 +1,3 @@
-// ABIs
 export { identityRegistryAbi, reputationRegistryAbi } from './abis/index.js'
 export {
   getErc8004Addresses,
@@ -11,6 +10,5 @@ export type {
   RegisterAgentParameters,
   RegisterAgentWithMetadataParameters,
 } from './identity/index.js'
-// Identity
 export { isRegistered, registerAgent } from './identity/index.js'
 export type { Erc8004Addresses } from './types.js'
