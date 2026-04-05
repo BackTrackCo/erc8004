@@ -1,4 +1,5 @@
 import {
+  BaseError,
   ContractFunctionRevertedError,
   isAddressEqual,
   type PublicClient,
@@ -38,7 +39,12 @@ export async function verifyAgentId(
 
     return isAddressEqual(owner, parameters.claimedAddress)
   } catch (error) {
-    if (error instanceof ContractFunctionRevertedError) return false
+    if (error instanceof BaseError) {
+      const revert = error.walk(
+        (e) => e instanceof ContractFunctionRevertedError,
+      )
+      if (revert) return false
+    }
     throw error
   }
 }

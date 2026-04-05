@@ -148,10 +148,21 @@ describe('verifyAgentId', () => {
   })
 
   it('returns false for non-existent agentId (contract revert)', async () => {
-    const { ContractFunctionRevertedError } = await import('viem')
-    const revertError = Object.create(ContractFunctionRevertedError.prototype)
+    const { ContractFunctionExecutionError, ContractFunctionRevertedError } =
+      await import('viem')
+    // viem wraps reverts: ContractFunctionExecutionError → .cause → ContractFunctionRevertedError
+    const innerRevert = Object.create(ContractFunctionRevertedError.prototype)
+    const outerError = Object.create(ContractFunctionExecutionError.prototype)
+    outerError.cause = innerRevert
+    // BaseError.walk() traverses this chain
+    outerError.walk = function (fn: (e: unknown) => boolean): unknown | null {
+      if (fn(this)) return this
+      if (this.cause && fn(this.cause)) return this.cause
+      return null
+    }
     const client = {
-      readContract: vi.fn().mockRejectedValue(revertError),
+      chain: { id: 8453 },
+      readContract: vi.fn().mockRejectedValue(outerError),
     } as unknown as PublicClient
 
     const result = await verifyAgentId(client, {
@@ -213,9 +224,13 @@ describe('resolveAgent', () => {
       agentId: 42n,
     })
 
-    expect(agent.ownerMismatch).toBe(true)
-    expect(agent.owner).toBe(ADDR_B)
-    expect(agent.agentWallet).toBe(ADDR_A)
+    expect(agent).toEqual({
+      agentId: 42n,
+      owner: ADDR_B,
+      agentWallet: ADDR_A,
+      agentURI: 'https://example.com/agent.json',
+      ownerMismatch: true,
+    })
   })
 })
 
@@ -234,12 +249,21 @@ describe('getAgentWallet', () => {
 // --- getMetadata ---
 
 describe('getMetadata', () => {
-  it('returns raw bytes for a metadata key', async () => {
-    const result = await getMetadata(
-      mockPublic({ getMetadata: '0xdeadbeef' }),
-      { registryAddress: REGISTRY, agentId: 1n, key: 'x402r.operators' },
-    )
+  it('passes args in correct order (agentId, key)', async () => {
+    const client = mockPublic({ getMetadata: '0xdeadbeef' })
+    const result = await getMetadata(client, {
+      registryAddress: REGISTRY,
+      agentId: 42n,
+      key: 'x402r.operators',
+    })
+
     expect(result).toBe('0xdeadbeef')
+    expect(client.readContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        functionName: 'getMetadata',
+        args: [42n, 'x402r.operators'],
+      }),
+    )
   })
 })
 
