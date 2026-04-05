@@ -6,8 +6,24 @@ export {
   TESTNET_ADDRESSES,
 } from './addresses.js'
 export type {
+  GetAgentWalletParameters,
+  GetMetadataParameters,
   IsRegisteredParameters,
   RegisterAgentParameters,
+  ResolveAgentParameters,
+  ResolvedAgent,
+  SetAgentURIParameters,
+  SetMetadataParameters,
+  VerifyAgentIdParameters,
 } from './identity/index.js'
-export { isRegistered, registerAgent } from './identity/index.js'
+export {
+  getAgentWallet,
+  getMetadata,
+  isRegistered,
+  registerAgent,
+  resolveAgent,
+  setAgentURI,
+  setMetadata,
+  verifyAgentId,
+} from './identity/index.js'
 export type { Erc8004Addresses } from './types.js'
