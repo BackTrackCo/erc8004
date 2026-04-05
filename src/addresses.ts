@@ -16,22 +16,19 @@ const TESTNET_ADDRESSES = {
 /**
  * Explicit per-chain address map.
  * Only includes chains with verified ERC-8004 deployment.
+ * Sources: Basescan/Etherscan contract verification, agent0-sdk DEFAULT_REGISTRIES,
+ * erc-8004-contracts repo README.
  */
 const ERC8004_REGISTRIES: Record<number, Erc8004Addresses> = {
-  // Mainnets
-  1: MAINNET_ADDRESSES, // Ethereum
-  8453: MAINNET_ADDRESSES, // Base
-  137: MAINNET_ADDRESSES, // Polygon
-  42161: MAINNET_ADDRESSES, // Arbitrum One
-  10: MAINNET_ADDRESSES, // Optimism
-  42220: MAINNET_ADDRESSES, // Celo
-  43114: MAINNET_ADDRESSES, // Avalanche
-  143: MAINNET_ADDRESSES, // Monad
-  59144: MAINNET_ADDRESSES, // Linea
-  // Testnets
+  // Mainnets — verified via block explorer + erc-8004-contracts repo
+  1: MAINNET_ADDRESSES, // Ethereum (Etherscan verified, 15K+ txns)
+  8453: MAINNET_ADDRESSES, // Base (Basescan verified)
+  137: MAINNET_ADDRESSES, // Polygon (Polygonscan verified)
+  42161: MAINNET_ADDRESSES, // Arbitrum (RPC verified, 8004scan indexes)
+  10: MAINNET_ADDRESSES, // Optimism (RPC verified, erc-8004 repo)
+  // Testnets — verified via agent0-sdk + RPC
   84532: TESTNET_ADDRESSES, // Base Sepolia
   11155111: TESTNET_ADDRESSES, // Ethereum Sepolia
-  421614: TESTNET_ADDRESSES, // Arbitrum Sepolia
 }
 
 /**
