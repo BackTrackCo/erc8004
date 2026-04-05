@@ -8,7 +8,7 @@ import type { Account, WalletClient } from 'viem'
 export function requireAccount(walletClient: WalletClient): Account {
   if (!walletClient.account) {
     throw new Error(
-      'walletClient must have an account — use a walletClient with a connected account',
+      'walletClient must have an account: use a walletClient with a connected account',
     )
   }
   return walletClient.account

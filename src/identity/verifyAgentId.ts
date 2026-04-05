@@ -1,4 +1,4 @@
-import type { PublicClient } from 'viem'
+import { isAddressEqual, type PublicClient } from 'viem'
 import { identityRegistryAbi } from '../abis/index.js'
 import type { VerifyAgentIdParameters } from './types.js'
 
@@ -27,7 +27,7 @@ export async function verifyAgentId(
       args: [agentId],
     })
 
-    return owner.toLowerCase() === claimedAddress.toLowerCase()
+    return isAddressEqual(owner, claimedAddress)
   } catch {
     return false
   }

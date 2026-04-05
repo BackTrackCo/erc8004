@@ -241,6 +241,23 @@ describe('setMetadata', () => {
       }),
     ).rejects.toThrow('walletClient must have an account')
   })
+
+  it('passes args in correct order (agentId, key, value)', async () => {
+    const client = mockWallet()
+    await setMetadata(client, {
+      registryAddress: REGISTRY,
+      agentId: 42n,
+      key: 'x402r.operators',
+      value: '0xabcd',
+    })
+
+    expect(client.writeContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        functionName: 'setMetadata',
+        args: [42n, 'x402r.operators', '0xabcd'],
+      }),
+    )
+  })
 })
 
 // --- setAgentURI ---

@@ -1,4 +1,4 @@
-import type { PublicClient } from 'viem'
+import { isAddressEqual, type PublicClient } from 'viem'
 import { identityRegistryAbi } from '../abis/index.js'
 import type { ResolveAgentParameters, ResolvedAgent } from './types.js'
 
@@ -44,6 +44,6 @@ export async function resolveAgent(
     owner,
     agentWallet,
     agentURI,
-    ownerMismatch: owner.toLowerCase() !== agentWallet.toLowerCase(),
+    ownerMismatch: !isAddressEqual(owner, agentWallet),
   }
 }
