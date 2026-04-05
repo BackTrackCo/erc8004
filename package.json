@@ -59,6 +59,16 @@
     "viem": "^2.47.10",
     "vitest": "^4.1.2"
   },
+  "size-limit": [
+    {
+      "path": "dist/index.js",
+      "limit": "5 kB"
+    },
+    {
+      "path": "dist/abis/index.js",
+      "limit": "50 kB"
+    }
+  ],
   "keywords": [
     "erc-8004",
     "erc8004",
