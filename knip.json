@@ -1,13 +1,3 @@
 {
-  "entry": [
-    "src/index.ts",
-    "src/identity/index.ts",
-    "src/reputation/index.ts",
-    "src/abis/index.ts",
-    "tests/**/*.test.ts",
-    "tests/**/*.ts",
-    "vitest.config.ts",
-    "wagmi.config.ts"
-  ],
-  "ignoreDependencies": ["@vitest/coverage-v8"]
+  "entry": ["wagmi.config.ts"]
 }
