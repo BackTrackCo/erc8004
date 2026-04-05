@@ -1,0 +1,169 @@
+import type { PublicClient, WalletClient } from 'viem'
+import { parseEventLogs, zeroHash } from 'viem'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { identityRegistryAbi } from '../../src/abis/index.js'
+import { registerAgent } from '../../src/identity/register.js'
+import { appendResponse } from '../../src/reputation/appendResponse.js'
+import { getClients } from '../../src/reputation/getClients.js'
+import { getLastIndex } from '../../src/reputation/getLastIndex.js'
+import { getResponseCount } from '../../src/reputation/getResponseCount.js'
+import { getSummary } from '../../src/reputation/getSummary.js'
+import { giveFeedback } from '../../src/reputation/giveFeedback.js'
+import { readAllFeedback } from '../../src/reputation/readAllFeedback.js'
+import { readFeedback } from '../../src/reputation/readFeedback.js'
+import { revokeFeedback } from '../../src/reputation/revokeFeedback.js'
+import { anvilBaseSepolia } from '../setup/anvil.js'
+import { accounts } from '../setup/constants.js'
+
+describe('Reputation Registry (fork)', () => {
+  let publicClient: PublicClient
+  let agentOwnerClient: WalletClient
+  let feedbackGiverClient: WalletClient
+  let agentId: bigint
+
+  beforeAll(async () => {
+    publicClient = anvilBaseSepolia.getPublicClient()
+    agentOwnerClient = anvilBaseSepolia.getWalletClient(accounts[0].address)
+    feedbackGiverClient = anvilBaseSepolia.getWalletClient(accounts[1].address)
+
+    // Register an agent so we have a target for feedback
+    const hash = await registerAgent(agentOwnerClient, {
+      agentURI: 'https://reputation-test.example.com/agent.json',
+    })
+    const receipt = await publicClient.waitForTransactionReceipt({ hash })
+    const logs = parseEventLogs({
+      abi: identityRegistryAbi,
+      logs: receipt.logs,
+      eventName: 'Registered',
+    })
+    agentId = logs[0].args.agentId
+  })
+
+  it('giveFeedback submits feedback', async () => {
+    const hash = await giveFeedback(feedbackGiverClient, {
+      agentId,
+      value: 85n,
+      valueDecimals: 0,
+      tag1: 'x402r.resolution',
+      tag2: 'quality',
+      endpoint: '',
+      feedbackURI: '',
+      feedbackHash: zeroHash,
+    })
+    const receipt = await publicClient.waitForTransactionReceipt({ hash })
+    expect(receipt.status).toBe('success')
+  })
+
+  it('getClients includes the feedback giver', async () => {
+    const clients = await getClients(publicClient, { agentId })
+    expect(clients.map((c) => c.toLowerCase())).toContain(
+      accounts[1].address.toLowerCase(),
+    )
+  })
+
+  it('getLastIndex returns the feedback index', async () => {
+    const index = await getLastIndex(publicClient, {
+      agentId,
+      clientAddress: accounts[1].address,
+    })
+    expect(index).toBeGreaterThan(0n)
+  })
+
+  it('readFeedback returns the submitted feedback', async () => {
+    const lastIndex = await getLastIndex(publicClient, {
+      agentId,
+      clientAddress: accounts[1].address,
+    })
+
+    const feedback = await readFeedback(publicClient, {
+      agentId,
+      clientAddress: accounts[1].address,
+      feedbackIndex: lastIndex,
+    })
+
+    expect(feedback.value).toBe(85n)
+    expect(feedback.tag1).toBe('x402r.resolution')
+    expect(feedback.tag2).toBe('quality')
+    expect(feedback.isRevoked).toBe(false)
+  })
+
+  it('getSummary aggregates feedback', async () => {
+    const summary = await getSummary(publicClient, {
+      agentId,
+      clientAddresses: [accounts[1].address],
+      tag1: 'x402r.resolution',
+      tag2: 'quality',
+    })
+
+    expect(summary.count).toBeGreaterThan(0n)
+    expect(summary.summaryValue).toBe(85n)
+  })
+
+  it('readAllFeedback returns structured entries', async () => {
+    const entries = await readAllFeedback(publicClient, {
+      agentId,
+      clientAddresses: [accounts[1].address],
+      tag1: 'x402r.resolution',
+      tag2: 'quality',
+      includeRevoked: false,
+    })
+
+    expect(entries.length).toBeGreaterThan(0)
+    expect(entries[0].value).toBe(85n)
+    expect(entries[0].tag1).toBe('x402r.resolution')
+  })
+
+  it('appendResponse adds a response to feedback', async () => {
+    const lastIndex = await getLastIndex(publicClient, {
+      agentId,
+      clientAddress: accounts[1].address,
+    })
+
+    const hash = await appendResponse(agentOwnerClient, {
+      agentId,
+      clientAddress: accounts[1].address,
+      feedbackIndex: lastIndex,
+      responseURI: 'https://response.example.com',
+      responseHash: zeroHash,
+    })
+    const receipt = await publicClient.waitForTransactionReceipt({ hash })
+    expect(receipt.status).toBe('success')
+  })
+
+  it('getResponseCount returns the response count', async () => {
+    const lastIndex = await getLastIndex(publicClient, {
+      agentId,
+      clientAddress: accounts[1].address,
+    })
+
+    const count = await getResponseCount(publicClient, {
+      agentId,
+      clientAddress: accounts[1].address,
+      feedbackIndex: lastIndex,
+      responders: [accounts[0].address],
+    })
+
+    expect(count).toBeGreaterThan(0n)
+  })
+
+  it('revokeFeedback marks feedback as revoked', async () => {
+    const lastIndex = await getLastIndex(publicClient, {
+      agentId,
+      clientAddress: accounts[1].address,
+    })
+
+    const hash = await revokeFeedback(feedbackGiverClient, {
+      agentId,
+      feedbackIndex: lastIndex,
+    })
+    const receipt = await publicClient.waitForTransactionReceipt({ hash })
+    expect(receipt.status).toBe('success')
+
+    const feedback = await readFeedback(publicClient, {
+      agentId,
+      clientAddress: accounts[1].address,
+      feedbackIndex: lastIndex,
+    })
+    expect(feedback.isRevoked).toBe(true)
+  })
+})

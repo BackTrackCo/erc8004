@@ -20,6 +20,7 @@ export default defineConfig({
         test: {
           name: 'fork',
           include: ['tests/fork/**/*.fork.test.ts'],
+          globalSetup: ['tests/setup/globalSetup.ts'],
           testTimeout: 60_000,
           hookTimeout: 60_000,
           retry: 3,
