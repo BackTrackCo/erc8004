@@ -1,5 +1,6 @@
 import type { PublicClient } from 'viem'
 import { identityRegistryAbi } from '../abis/index.js'
+import { resolveIdentityRegistry } from '../internal/resolveRegistryAddress.js'
 import type { IsRegisteredParameters } from './types.js'
 
 /**
@@ -11,13 +12,16 @@ export async function isRegistered(
   publicClient: PublicClient,
   parameters: IsRegisteredParameters,
 ): Promise<boolean> {
-  const { registryAddress, address } = parameters
+  const registry = resolveIdentityRegistry(
+    publicClient,
+    parameters.registryAddress,
+  )
 
   const balance = await publicClient.readContract({
-    address: registryAddress,
+    address: registry,
     abi: identityRegistryAbi,
     functionName: 'balanceOf',
-    args: [address],
+    args: [parameters.address],
   })
 
   return balance > 0n
