@@ -108,9 +108,16 @@ describe('Reputation Registry (fork)', () => {
       includeRevoked: false,
     })
 
-    expect(entries.length).toBeGreaterThan(0)
+    expect(entries).toHaveLength(1)
+    expect(entries[0].client.toLowerCase()).toBe(
+      accounts[1].address.toLowerCase(),
+    )
+    expect(entries[0].feedbackIndex).toBeGreaterThan(0n)
     expect(entries[0].value).toBe(85n)
+    expect(entries[0].valueDecimals).toBe(0)
     expect(entries[0].tag1).toBe('x402r.resolution')
+    expect(entries[0].tag2).toBe('quality')
+    expect(entries[0].isRevoked).toBe(false)
   })
 
   it('appendResponse adds a response to feedback', async () => {

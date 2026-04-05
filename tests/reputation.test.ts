@@ -14,7 +14,7 @@ import {
   ADDR_B,
   mockPublic,
   mockWallet,
-  REGISTRY,
+  REPUTATION_REGISTRY,
 } from './setup/mocks.js'
 
 const ZERO_HASH =
@@ -26,7 +26,7 @@ describe('giveFeedback', () => {
   it('throws when walletClient has no account', async () => {
     await expect(
       giveFeedback(mockWallet({ account: undefined }), {
-        registryAddress: REGISTRY,
+        registryAddress: REPUTATION_REGISTRY,
         agentId: 1n,
         value: 85n,
         valueDecimals: 0,
@@ -42,7 +42,7 @@ describe('giveFeedback', () => {
   it('passes all 8 args in correct order', async () => {
     const client = mockWallet()
     await giveFeedback(client, {
-      registryAddress: REGISTRY,
+      registryAddress: REPUTATION_REGISTRY,
       agentId: 42n,
       value: 85n,
       valueDecimals: 2,
@@ -77,7 +77,7 @@ describe('revokeFeedback', () => {
   it('throws when walletClient has no account', async () => {
     await expect(
       revokeFeedback(mockWallet({ account: undefined }), {
-        registryAddress: REGISTRY,
+        registryAddress: REPUTATION_REGISTRY,
         agentId: 1n,
         feedbackIndex: 1n,
       }),
@@ -87,7 +87,7 @@ describe('revokeFeedback', () => {
   it('passes args in correct order (agentId, feedbackIndex)', async () => {
     const client = mockWallet()
     await revokeFeedback(client, {
-      registryAddress: REGISTRY,
+      registryAddress: REPUTATION_REGISTRY,
       agentId: 42n,
       feedbackIndex: 3n,
     })
@@ -107,7 +107,7 @@ describe('appendResponse', () => {
   it('throws when walletClient has no account', async () => {
     await expect(
       appendResponse(mockWallet({ account: undefined }), {
-        registryAddress: REGISTRY,
+        registryAddress: REPUTATION_REGISTRY,
         agentId: 1n,
         clientAddress: ADDR_B,
         feedbackIndex: 1n,
@@ -120,7 +120,7 @@ describe('appendResponse', () => {
   it('passes args in correct order', async () => {
     const client = mockWallet()
     await appendResponse(client, {
-      registryAddress: REGISTRY,
+      registryAddress: REPUTATION_REGISTRY,
       agentId: 42n,
       clientAddress: ADDR_B,
       feedbackIndex: 1n,
@@ -146,7 +146,7 @@ describe('getSummary', () => {
     })
 
     const result = await getSummary(client, {
-      registryAddress: REGISTRY,
+      registryAddress: REPUTATION_REGISTRY,
       agentId: 42n,
       clientAddresses: [ADDR_A],
       tag1: 'x402r.resolution',
@@ -168,7 +168,7 @@ describe('getClients', () => {
     const client = mockPublic({ getClients: [ADDR_A, ADDR_B] })
 
     const result = await getClients(client, {
-      registryAddress: REGISTRY,
+      registryAddress: REPUTATION_REGISTRY,
       agentId: 42n,
     })
 
@@ -185,7 +185,7 @@ describe('readFeedback', () => {
     })
 
     const result = await readFeedback(client, {
-      registryAddress: REGISTRY,
+      registryAddress: REPUTATION_REGISTRY,
       agentId: 42n,
       clientAddress: ADDR_A,
       feedbackIndex: 1n,
@@ -218,7 +218,7 @@ describe('readAllFeedback', () => {
     })
 
     const result = await readAllFeedback(client, {
-      registryAddress: REGISTRY,
+      registryAddress: REPUTATION_REGISTRY,
       agentId: 42n,
       clientAddresses: [ADDR_A, ADDR_B],
       tag1: 'x402r.resolution',
@@ -248,13 +248,53 @@ describe('readAllFeedback', () => {
     ])
   })
 
+  it('includes revoked entries when includeRevoked is true', async () => {
+    const client = mockPublic({
+      readAllFeedback: [
+        [ADDR_A],
+        [1n],
+        [85n],
+        [0],
+        ['x402r.resolution'],
+        ['quality'],
+        [true],
+      ],
+    })
+
+    const result = await readAllFeedback(client, {
+      registryAddress: REPUTATION_REGISTRY,
+      agentId: 42n,
+      clientAddresses: [ADDR_A],
+      tag1: 'x402r.resolution',
+      tag2: 'quality',
+      includeRevoked: true,
+    })
+
+    expect(result).toEqual([
+      {
+        client: ADDR_A,
+        feedbackIndex: 1n,
+        value: 85n,
+        valueDecimals: 0,
+        tag1: 'x402r.resolution',
+        tag2: 'quality',
+        isRevoked: true,
+      },
+    ])
+    expect(client.readContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        args: expect.arrayContaining([true]),
+      }),
+    )
+  })
+
   it('returns empty array when no feedback exists', async () => {
     const client = mockPublic({
       readAllFeedback: [[], [], [], [], [], [], []],
     })
 
     const result = await readAllFeedback(client, {
-      registryAddress: REGISTRY,
+      registryAddress: REPUTATION_REGISTRY,
       agentId: 42n,
       clientAddresses: [ADDR_A],
       tag1: 'x402r.resolution',
@@ -273,7 +313,7 @@ describe('getLastIndex', () => {
     const client = mockPublic({ getLastIndex: 3n })
 
     const result = await getLastIndex(client, {
-      registryAddress: REGISTRY,
+      registryAddress: REPUTATION_REGISTRY,
       agentId: 42n,
       clientAddress: ADDR_A,
     })
@@ -289,7 +329,7 @@ describe('getResponseCount', () => {
     const client = mockPublic({ getResponseCount: 2n })
 
     const result = await getResponseCount(client, {
-      registryAddress: REGISTRY,
+      registryAddress: REPUTATION_REGISTRY,
       agentId: 42n,
       clientAddress: ADDR_A,
       feedbackIndex: 1n,

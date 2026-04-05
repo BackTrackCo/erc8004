@@ -68,6 +68,10 @@
       "limit": "5 kB"
     },
     {
+      "path": "dist/identity/index.js",
+      "limit": "5 kB"
+    },
+    {
       "path": "dist/reputation/index.js",
       "limit": "5 kB"
     },
