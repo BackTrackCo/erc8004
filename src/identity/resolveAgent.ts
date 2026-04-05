@@ -1,5 +1,6 @@
 import { isAddressEqual, type PublicClient } from 'viem'
 import { identityRegistryAbi } from '../abis/index.js'
+import { resolveIdentityRegistry } from '../internal/resolveRegistryAddress.js'
 import type { ResolveAgentParameters, ResolvedAgent } from './types.js'
 
 /**
@@ -16,31 +17,34 @@ export async function resolveAgent(
   publicClient: PublicClient,
   parameters: ResolveAgentParameters,
 ): Promise<ResolvedAgent> {
-  const { registryAddress, agentId } = parameters
+  const registry = resolveIdentityRegistry(
+    publicClient,
+    parameters.registryAddress,
+  )
 
   const [owner, agentWallet, agentURI] = await Promise.all([
     publicClient.readContract({
-      address: registryAddress,
+      address: registry,
       abi: identityRegistryAbi,
       functionName: 'ownerOf',
-      args: [agentId],
+      args: [parameters.agentId],
     }),
     publicClient.readContract({
-      address: registryAddress,
+      address: registry,
       abi: identityRegistryAbi,
       functionName: 'getAgentWallet',
-      args: [agentId],
+      args: [parameters.agentId],
     }),
     publicClient.readContract({
-      address: registryAddress,
+      address: registry,
       abi: identityRegistryAbi,
       functionName: 'tokenURI',
-      args: [agentId],
+      args: [parameters.agentId],
     }),
   ])
 
   return {
-    agentId,
+    agentId: parameters.agentId,
     owner,
     agentWallet,
     agentURI,

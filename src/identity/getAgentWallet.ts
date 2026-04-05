@@ -1,5 +1,6 @@
 import type { Address, PublicClient } from 'viem'
 import { identityRegistryAbi } from '../abis/index.js'
+import { resolveIdentityRegistry } from '../internal/resolveRegistryAddress.js'
 import type { GetAgentWalletParameters } from './types.js'
 
 /**
@@ -11,12 +12,15 @@ export async function getAgentWallet(
   publicClient: PublicClient,
   parameters: GetAgentWalletParameters,
 ): Promise<Address> {
-  const { registryAddress, agentId } = parameters
+  const registry = resolveIdentityRegistry(
+    publicClient,
+    parameters.registryAddress,
+  )
 
   return publicClient.readContract({
-    address: registryAddress,
+    address: registry,
     abi: identityRegistryAbi,
     functionName: 'getAgentWallet',
-    args: [agentId],
+    args: [parameters.agentId],
   })
 }

@@ -1,6 +1,7 @@
 import type { Hash, WalletClient } from 'viem'
 import { identityRegistryAbi } from '../abis/index.js'
 import { requireAccount } from '../internal/requireAccount.js'
+import { resolveIdentityRegistry } from '../internal/resolveRegistryAddress.js'
 import type { SetMetadataParameters } from './types.js'
 
 /**
@@ -11,14 +12,17 @@ export async function setMetadata(
   walletClient: WalletClient,
   parameters: SetMetadataParameters,
 ): Promise<Hash> {
-  const { registryAddress, agentId, key, value } = parameters
   const account = requireAccount(walletClient)
+  const registry = resolveIdentityRegistry(
+    walletClient,
+    parameters.registryAddress,
+  )
 
   return walletClient.writeContract({
-    address: registryAddress,
+    address: registry,
     abi: identityRegistryAbi,
     functionName: 'setMetadata',
-    args: [agentId, key, value],
+    args: [parameters.agentId, parameters.key, parameters.value],
     chain: walletClient.chain,
     account,
   })

@@ -4,6 +4,7 @@ import {
   type PublicClient,
 } from 'viem'
 import { identityRegistryAbi } from '../abis/index.js'
+import { resolveIdentityRegistry } from '../internal/resolveRegistryAddress.js'
 import type { VerifyAgentIdParameters } from './types.js'
 
 /**
@@ -22,17 +23,20 @@ export async function verifyAgentId(
   publicClient: PublicClient,
   parameters: VerifyAgentIdParameters,
 ): Promise<boolean> {
-  const { registryAddress, agentId, claimedAddress } = parameters
+  const registry = resolveIdentityRegistry(
+    publicClient,
+    parameters.registryAddress,
+  )
 
   try {
     const owner = await publicClient.readContract({
-      address: registryAddress,
+      address: registry,
       abi: identityRegistryAbi,
       functionName: 'ownerOf',
-      args: [agentId],
+      args: [parameters.agentId],
     })
 
-    return isAddressEqual(owner, claimedAddress)
+    return isAddressEqual(owner, parameters.claimedAddress)
   } catch (error) {
     if (error instanceof ContractFunctionRevertedError) return false
     throw error

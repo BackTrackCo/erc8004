@@ -1,6 +1,7 @@
 import type { Hash, WalletClient } from 'viem'
 import { identityRegistryAbi } from '../abis/index.js'
 import { requireAccount } from '../internal/requireAccount.js'
+import { resolveIdentityRegistry } from '../internal/resolveRegistryAddress.js'
 import type { RegisterAgentParameters } from './types.js'
 
 /**
@@ -12,12 +13,16 @@ export async function registerAgent(
   walletClient: WalletClient,
   parameters: RegisterAgentParameters,
 ): Promise<Hash> {
-  const { registryAddress, agentURI, metadata } = parameters
+  const { agentURI, metadata } = parameters
   const account = requireAccount(walletClient)
+  const registry = resolveIdentityRegistry(
+    walletClient,
+    parameters.registryAddress,
+  )
 
   if (metadata && metadata.length > 0) {
     return walletClient.writeContract({
-      address: registryAddress,
+      address: registry,
       abi: identityRegistryAbi,
       functionName: 'register',
       args: [
@@ -33,7 +38,7 @@ export async function registerAgent(
   }
 
   return walletClient.writeContract({
-    address: registryAddress,
+    address: registry,
     abi: identityRegistryAbi,
     functionName: 'register',
     args: [agentURI],

@@ -1,24 +1,24 @@
 import type { Address, Hex } from 'viem'
 
 export interface RegisterAgentParameters {
-  registryAddress: Address
+  registryAddress?: Address
   agentURI: string
   metadata?: Array<{ key: string; value: Hex }>
 }
 
 export interface IsRegisteredParameters {
-  registryAddress: Address
+  registryAddress?: Address
   address: Address
 }
 
 export interface VerifyAgentIdParameters {
-  registryAddress: Address
+  registryAddress?: Address
   agentId: bigint
   claimedAddress: Address
 }
 
 export interface ResolveAgentParameters {
-  registryAddress: Address
+  registryAddress?: Address
   agentId: bigint
 }
 
@@ -31,25 +31,25 @@ export interface ResolvedAgent {
 }
 
 export interface GetAgentWalletParameters {
-  registryAddress: Address
+  registryAddress?: Address
   agentId: bigint
 }
 
 export interface GetMetadataParameters {
-  registryAddress: Address
+  registryAddress?: Address
   agentId: bigint
   key: string
 }
 
 export interface SetMetadataParameters {
-  registryAddress: Address
+  registryAddress?: Address
   agentId: bigint
   key: string
   value: Hex
 }
 
 export interface SetAgentURIParameters {
-  registryAddress: Address
+  registryAddress?: Address
   agentId: bigint
   newURI: string
 }

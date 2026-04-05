@@ -15,6 +15,7 @@ const ADDR_B = '0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB' as Address
 
 function mockPublic(impl: Record<string, unknown>): PublicClient {
   return {
+    chain: { id: 8453 },
     readContract: vi.fn(({ functionName }: { functionName: string }) => {
       if (functionName in impl) return Promise.resolve(impl[functionName])
       return Promise.reject(new Error(`unexpected call: ${functionName}`))
@@ -300,6 +301,44 @@ describe('setAgentURI', () => {
         functionName: 'setAgentURI',
         args: [42n, 'https://example.com/new.json'],
       }),
+    )
+  })
+})
+
+// --- registryAddress auto-resolve ---
+
+describe('registryAddress auto-resolve', () => {
+  it('resolves from client.chain when registryAddress omitted', async () => {
+    const client = mockPublic({ balanceOf: 1n })
+    // mockWallet/mockPublic have chain: { id: 8453 } (Base mainnet)
+    // auto-resolves to 0x8004A169FB4a3325136EB29fA0ceB6D2e539a432
+    const result = await isRegistered(client, { address: ADDR_A })
+    expect(result).toBe(true)
+  })
+
+  it('throws when no chain and no registryAddress', async () => {
+    const client = {
+      readContract: vi.fn(),
+      chain: undefined,
+    } as unknown as PublicClient
+
+    await expect(isRegistered(client, { address: ADDR_A })).rejects.toThrow(
+      'client chain not configured',
+    )
+  })
+
+  it('prefers explicit registryAddress over chain resolve', async () => {
+    const customRegistry =
+      '0x1111111111111111111111111111111111111111' as Address
+    const client = mockPublic({ balanceOf: 1n })
+
+    await isRegistered(client, {
+      registryAddress: customRegistry,
+      address: ADDR_A,
+    })
+
+    expect(client.readContract).toHaveBeenCalledWith(
+      expect.objectContaining({ address: customRegistry }),
     )
   })
 })
