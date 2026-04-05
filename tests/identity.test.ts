@@ -97,6 +97,20 @@ describe('registerAgent', () => {
       }),
     )
   })
+
+  it('propagates writeContract rejection', async () => {
+    const client = {
+      ...mockWallet(),
+      writeContract: vi.fn().mockRejectedValue(new Error('execution reverted')),
+    } as unknown as WalletClient
+
+    await expect(
+      registerAgent(client, {
+        registryAddress: REGISTRY,
+        agentURI: 'https://example.com/agent.json',
+      }),
+    ).rejects.toThrow('execution reverted')
+  })
 })
 
 // --- verifyAgentId ---
@@ -130,6 +144,21 @@ describe('verifyAgentId', () => {
       },
     )
     expect(result).toBe(true)
+  })
+
+  it('returns false for non-existent agentId (ownerOf reverts)', async () => {
+    const client = {
+      readContract: vi
+        .fn()
+        .mockRejectedValue(new Error('ERC721: invalid token ID')),
+    } as unknown as PublicClient
+
+    const result = await verifyAgentId(client, {
+      registryAddress: REGISTRY,
+      agentId: 999999n,
+      claimedAddress: ADDR_A,
+    })
+    expect(result).toBe(false)
   })
 })
 
