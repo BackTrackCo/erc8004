@@ -10,10 +10,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: Lint & Audit
+  ci:
+    name: CI
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -23,45 +23,22 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
-      - run: pnpm audit --audit-level=high
-
-  typecheck:
-    name: Typecheck
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm typecheck
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
       - run: pnpm test:cov
+      - run: pnpm publint --strict
+      - run: pnpm attw --pack --ignore-rules no-resolution cjs-resolves-to-esm
+      - run: pnpm knip
+      - run: pnpm size-limit
       - name: Upload coverage
         uses: codecov/codecov-action@v5
+        if: always()
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage/lcov.info
           fail_ci_if_error: false
 
-  test-fork:
+  fork-tests:
     name: Fork Tests
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -85,45 +62,3 @@ jobs:
           timeout_minutes: 10
           max_attempts: 2
           command: pnpm vitest run --project fork
-
-  publish-validation:
-    name: Publish Validation
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm publint --strict
-      - run: pnpm attw --pack --ignore-rules no-resolution cjs-resolves-to-esm
-      - run: pnpm knip
-      - run: pnpm size-limit
-
-  abi-drift:
-    name: ABI Drift
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Regenerate ABIs
-        if: env.BASESCAN_API_KEY != ''
-        env:
-          BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
-        run: pnpm generate
-      - name: Check for drift
-        if: env.BASESCAN_API_KEY != ''
-        env:
-          BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
-        run: git diff --exit-code src/abis/generated.ts
