@@ -63,6 +63,7 @@ jobs:
 
   test-fork:
     name: Fork Tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -75,11 +76,15 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - name: Run fork tests
+        if: env.FORK_URL != ''
         uses: nick-fields/retry@v3
+        env:
+          FORK_URL: ${{ secrets.FORK_URL }}
+          TEST_PRIVATE_KEY: ${{ secrets.TEST_PRIVATE_KEY }}
         with:
           timeout_minutes: 10
           max_attempts: 2
-          command: FORK_URL=${{ secrets.FORK_URL }} TEST_PRIVATE_KEY=${{ secrets.TEST_PRIVATE_KEY }} pnpm vitest run --project fork
+          command: pnpm vitest run --project fork
 
   publish-validation:
     name: Publish Validation
@@ -94,13 +99,14 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - run: publint --strict
-      - run: attw --pack --ignore-rules no-resolution cjs-resolves-to-esm
+      - run: pnpm publint --strict
+      - run: pnpm attw --pack --ignore-rules no-resolution cjs-resolves-to-esm
       - run: pnpm knip
       - run: pnpm size-limit
 
   abi-drift:
     name: ABI Drift
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -112,6 +118,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Regenerate ABIs
-        run: BASESCAN_API_KEY=${{ secrets.BASESCAN_API_KEY }} pnpm generate
+        if: env.BASESCAN_API_KEY != ''
+        env:
+          BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
+        run: pnpm generate
       - name: Check for drift
+        if: env.BASESCAN_API_KEY != ''
+        env:
+          BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
         run: git diff --exit-code src/abis/generated.ts
