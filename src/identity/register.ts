@@ -1,6 +1,6 @@
 import type { Hash, WalletClient } from 'viem'
 import { identityRegistryAbi } from '../abis/index.js'
-import { requireAccount } from './requireAccount.js'
+import { requireAccount } from '../internal/requireAccount.js'
 import type { RegisterAgentParameters } from './types.js'
 
 /**

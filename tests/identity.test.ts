@@ -146,11 +146,11 @@ describe('verifyAgentId', () => {
     expect(result).toBe(true)
   })
 
-  it('returns false for non-existent agentId (ownerOf reverts)', async () => {
+  it('returns false for non-existent agentId (contract revert)', async () => {
+    const { ContractFunctionRevertedError } = await import('viem')
+    const revertError = Object.create(ContractFunctionRevertedError.prototype)
     const client = {
-      readContract: vi
-        .fn()
-        .mockRejectedValue(new Error('ERC721: invalid token ID')),
+      readContract: vi.fn().mockRejectedValue(revertError),
     } as unknown as PublicClient
 
     const result = await verifyAgentId(client, {
@@ -159,6 +159,20 @@ describe('verifyAgentId', () => {
       claimedAddress: ADDR_A,
     })
     expect(result).toBe(false)
+  })
+
+  it('re-throws infrastructure errors (not contract reverts)', async () => {
+    const client = {
+      readContract: vi.fn().mockRejectedValue(new Error('network timeout')),
+    } as unknown as PublicClient
+
+    await expect(
+      verifyAgentId(client, {
+        registryAddress: REGISTRY,
+        agentId: 1n,
+        claimedAddress: ADDR_A,
+      }),
+    ).rejects.toThrow('network timeout')
   })
 })
 
@@ -271,5 +285,21 @@ describe('setAgentURI', () => {
         newURI: 'https://example.com/new.json',
       }),
     ).rejects.toThrow('walletClient must have an account')
+  })
+
+  it('passes args in correct order (agentId, newURI)', async () => {
+    const client = mockWallet()
+    await setAgentURI(client, {
+      registryAddress: REGISTRY,
+      agentId: 42n,
+      newURI: 'https://example.com/new.json',
+    })
+
+    expect(client.writeContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        functionName: 'setAgentURI',
+        args: [42n, 'https://example.com/new.json'],
+      }),
+    )
   })
 })
