@@ -26,4 +26,29 @@ export {
   setMetadata,
   verifyAgentId,
 } from './identity/index.js'
+export type {
+  AppendResponseParameters,
+  Feedback,
+  FeedbackEntry,
+  GetClientsParameters,
+  GetLastIndexParameters,
+  GetResponseCountParameters,
+  GetSummaryParameters,
+  GiveFeedbackParameters,
+  ReadAllFeedbackParameters,
+  ReadFeedbackParameters,
+  ReputationSummary,
+  RevokeFeedbackParameters,
+} from './reputation/index.js'
+export {
+  appendResponse,
+  getClients,
+  getLastIndex,
+  getResponseCount,
+  getSummary,
+  giveFeedback,
+  readAllFeedback,
+  readFeedback,
+  revokeFeedback,
+} from './reputation/index.js'
 export type { Erc8004Addresses } from './types.js'

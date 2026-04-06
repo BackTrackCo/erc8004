@@ -8,30 +8,13 @@ import { resolveAgent } from '../src/identity/resolveAgent.js'
 import { setAgentURI } from '../src/identity/setAgentURI.js'
 import { setMetadata } from '../src/identity/setMetadata.js'
 import { verifyAgentId } from '../src/identity/verifyAgentId.js'
-
-const REGISTRY = '0x8004A169FB4a3325136EB29fA0ceB6D2e539a432' as Address
-const ADDR_A = '0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' as Address
-const ADDR_B = '0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB' as Address
-
-function mockPublic(impl: Record<string, unknown>): PublicClient {
-  return {
-    chain: { id: 8453 },
-    readContract: vi.fn(({ functionName }: { functionName: string }) => {
-      if (functionName in impl) return Promise.resolve(impl[functionName])
-      return Promise.reject(new Error(`unexpected call: ${functionName}`))
-    }),
-  } as unknown as PublicClient
-}
-
-function mockWallet(
-  opts: { account?: { address: Address } } = { account: { address: ADDR_A } },
-): WalletClient {
-  return {
-    writeContract: vi.fn().mockResolvedValue('0xabc' as `0x${string}`),
-    chain: { id: 8453 },
-    ...opts,
-  } as unknown as WalletClient
-}
+import {
+  ADDR_A,
+  ADDR_B,
+  mockPublic,
+  mockWallet,
+  REGISTRY,
+} from './setup/mocks.js'
 
 // --- isRegistered ---
 

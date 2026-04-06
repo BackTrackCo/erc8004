@@ -26,3 +26,10 @@ export function resolveIdentityRegistry(
 ): Address {
   return resolveRegistry(client, 'identityRegistry', registryAddress)
 }
+
+export function resolveReputationRegistry(
+  client: { chain?: Chain | undefined },
+  registryAddress?: Address,
+): Address {
+  return resolveRegistry(client, 'reputationRegistry', registryAddress)
+}
