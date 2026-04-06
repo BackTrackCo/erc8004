@@ -17,6 +17,7 @@ import { resolveAgent } from '../src/identity/resolveAgent.js'
 import { setAgentURI } from '../src/identity/setAgentURI.js'
 import { setAgentWallet } from '../src/identity/setAgentWallet.js'
 import { setMetadata } from '../src/identity/setMetadata.js'
+import { signAgentWalletConsent } from '../src/identity/signAgentWalletConsent.js'
 import { unsetAgentWallet } from '../src/identity/unsetAgentWallet.js'
 import { verifyAgentId } from '../src/identity/verifyAgentId.js'
 import {
@@ -103,6 +104,21 @@ describe('registerAgent', () => {
       expect.objectContaining({
         functionName: 'register',
         args: [],
+      }),
+    )
+  })
+
+  it('treats empty string agentURI as register(""), not register()', async () => {
+    const client = mockWallet()
+    await registerAgent(client, {
+      registryAddress: REGISTRY,
+      agentURI: '',
+    })
+
+    expect(client.writeContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        functionName: 'register',
+        args: [''],
       }),
     )
   })
@@ -394,6 +410,49 @@ describe('unsetAgentWallet', () => {
       expect.objectContaining({
         functionName: 'unsetAgentWallet',
         args: [42n],
+      }),
+    )
+  })
+})
+
+// --- signAgentWalletConsent ---
+
+describe('signAgentWalletConsent', () => {
+  it('reads ownerOf and calls signTypedData with correct EIP-712 structure', async () => {
+    const signTypedData = vi.fn().mockResolvedValue('0xsig')
+    const walletClient = {
+      account: { address: ADDR_B },
+      signTypedData,
+    } as unknown as WalletClient
+
+    const publicClient = mockPublic({ ownerOf: ADDR_A })
+
+    await signAgentWalletConsent(walletClient, publicClient, {
+      registryAddress: REGISTRY,
+      agentId: 42n,
+      newWallet: ADDR_B,
+      deadline: 1000000n,
+    })
+
+    expect(publicClient.readContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        functionName: 'ownerOf',
+        args: [42n],
+      }),
+    )
+    expect(signTypedData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        domain: expect.objectContaining({
+          name: 'ERC8004IdentityRegistry',
+          version: '1',
+        }),
+        primaryType: 'AgentWalletSet',
+        message: expect.objectContaining({
+          agentId: 42n,
+          newWallet: ADDR_B,
+          owner: ADDR_A,
+          deadline: 1000000n,
+        }),
       }),
     )
   })

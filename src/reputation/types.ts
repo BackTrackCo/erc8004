@@ -1,12 +1,25 @@
 import type { Address, Hex } from 'viem'
 
 // ---------------------------------------------------------------------------
+// Utility parameters
+// ---------------------------------------------------------------------------
+
+export interface GetVersionParameters {
+  registryAddress?: Address
+}
+
+export interface GetIdentityRegistryParameters {
+  registryAddress?: Address
+}
+
+// ---------------------------------------------------------------------------
 // Write parameters
 // ---------------------------------------------------------------------------
 
 export interface GiveFeedbackParameters {
   registryAddress?: Address
   agentId: bigint
+  /** int128 on-chain — negative values represent negative feedback. */
   value: bigint
   valueDecimals: number
   tag1: string

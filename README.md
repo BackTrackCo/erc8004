@@ -1,11 +1,11 @@
 # @x402r/erc8004
 
-TypeScript SDK for [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) Identity and Reputation registries. Pure [viem](https://viem.sh), zero additional dependencies.
+TypeScript SDK for [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) Identity and Reputation registries. Built on [viem](https://viem.sh).
 
 ## Install
 
 ```bash
-pnpm add @x402r/erc8004 viem
+npm install @x402r/erc8004
 ```
 
 ## Usage
@@ -71,19 +71,25 @@ const summary = await getSummary(publicClient, {
 | `resolveAgent` | Resolve agent by ID (owner, wallet, URI) |
 | `getAgentWallet` | Get wallet address for an agent |
 | `setAgentWallet` | Set verified payment wallet (EIP-712 sig) |
+| `signAgentWalletConsent` | Sign EIP-712 consent for `setAgentWallet` |
 | `unsetAgentWallet` | Clear agent wallet |
 | `getMetadata` | Read on-chain metadata by key |
 | `setMetadata` | Write on-chain metadata |
+| `parseMetadataSetReceipt` | Extract fields from `setMetadata` tx receipt |
 | `setAgentURI` | Update agent URI |
+| `parseURIUpdatedReceipt` | Extract fields from `setAgentURI` tx receipt |
+| `getVersion` | Read contract version string |
 
 ### Reputation
 
 | Function | Description |
 |---|---|
 | `giveFeedback` | Submit feedback for an agent |
-| `parseGiveFeedbackReceipt` | Extract `feedbackIndex` from feedback tx receipt |
+| `parseGiveFeedbackReceipt` | Extract fields from `giveFeedback` tx receipt |
 | `revokeFeedback` | Revoke previously given feedback |
+| `parseFeedbackRevokedReceipt` | Extract fields from `revokeFeedback` tx receipt |
 | `appendResponse` | Append a response to feedback |
+| `parseResponseAppendedReceipt` | Extract fields from `appendResponse` tx receipt |
 | `readFeedback` | Read a single feedback entry |
 | `readAllFeedback` | Read all feedback (filtered by reviewers and tags) |
 | `readAllFeedbackBatched` | Batched version — chunks `clientAddresses` to avoid RPC limits |
@@ -91,18 +97,27 @@ const summary = await getSummary(publicClient, {
 | `getClients` | All addresses that have given feedback |
 | `getLastIndex` | Latest feedback index for an agent-client pair |
 | `getResponseCount` | Count responses to a feedback entry |
+| `getIdentityRegistry` | Get linked Identity Registry address |
+| `getVersion` | Read contract version string |
 
 ## Chains
 
-| Chain | ID | Network |
-|---|---|---|
-| Ethereum | 1 | Mainnet |
-| Base | 8453 | Mainnet |
-| Polygon | 137 | Mainnet |
-| Arbitrum | 42161 | Mainnet |
-| Optimism | 10 | Mainnet |
-| Base Sepolia | 84532 | Testnet |
-| Ethereum Sepolia | 11155111 | Testnet |
+| Chain | ID |
+|---|---|
+| Ethereum | 1 |
+| Base | 8453 |
+| Polygon | 137 |
+| Arbitrum | 42161 |
+| Optimism | 10 |
+| Avalanche | 43114 |
+| BSC | 56 |
+| Scroll | 534352 |
+| Linea | 59144 |
+| Mantle | 5000 |
+| Gnosis | 100 |
+| Celo | 42220 |
+| Base Sepolia | 84532 |
+| Ethereum Sepolia | 11155111 |
 
 Registry addresses auto-resolve from `client.chain`. Pass `registryAddress` to override.
 
@@ -114,10 +129,6 @@ Registry addresses auto-resolve from `client.chain`. Pass `registryAddress` to o
 | `@x402r/erc8004/identity` | Identity registry functions and types |
 | `@x402r/erc8004/reputation` | Reputation registry functions and types |
 | `@x402r/erc8004/abis` | Raw contract ABIs |
-
-## Stability
-
-ERC-8004 is Draft status. The on-chain contracts are UUPS upgradeable. At 0.x, minor version bumps may contain breaking changes.
 
 ## License
 

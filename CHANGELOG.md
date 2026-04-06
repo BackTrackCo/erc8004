@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.1.0
+## 0.1.0-alpha.0
 
-Initial release.
+Initial alpha release.
 
 ### Identity
 
@@ -12,23 +12,31 @@ Initial release.
 - `verifyAgentId` — verify that an agentId belongs to a claimed address
 - `resolveAgent` — resolve agent by ID (owner, wallet, URI, ownerMismatch flag)
 - `getAgentWallet` / `setAgentWallet` / `unsetAgentWallet` — wallet management
+- `signAgentWalletConsent` — sign EIP-712 typed data for `setAgentWallet`
 - `getMetadata` / `setMetadata` — on-chain key-value metadata
+- `parseMetadataSetReceipt` — extract fields from setMetadata transaction receipt
 - `setAgentURI` — update agent URI
+- `parseURIUpdatedReceipt` — extract fields from setAgentURI transaction receipt
+- `getVersion` — read contract version string
 
 ### Reputation
 
 - `giveFeedback` — submit feedback for an agent
-- `parseGiveFeedbackReceipt` — extract feedbackIndex from feedback transaction receipt
+- `parseGiveFeedbackReceipt` — extract fields from giveFeedback transaction receipt
 - `revokeFeedback` — revoke previously given feedback
+- `parseFeedbackRevokedReceipt` — extract fields from revokeFeedback transaction receipt
 - `appendResponse` — append a response to existing feedback
+- `parseResponseAppendedReceipt` — extract fields from appendResponse transaction receipt
 - `readFeedback` / `readAllFeedback` / `readAllFeedbackBatched` — read feedback entries
 - `getSummary` — aggregated reputation summary
 - `getClients` — all reviewer addresses for an agent
 - `getLastIndex` — latest feedback index for an agent-client pair
 - `getResponseCount` — count responses to a feedback entry
+- `getIdentityRegistry` — get linked Identity Registry address
+- `getVersion` — read contract version string
 
 ### Infrastructure
 
-- Registry addresses for 7 chains (Ethereum, Base, Polygon, Arbitrum, Optimism, Base Sepolia, Ethereum Sepolia)
+- Registry addresses for 14 chains (Ethereum, Base, Polygon, Arbitrum, Optimism, Avalanche, BSC, Scroll, Linea, Mantle, Gnosis, Celo, Base Sepolia, Ethereum Sepolia)
 - Auto-resolve registry address from `client.chain`
 - Sub-path exports: `/identity`, `/reputation`, `/abis`

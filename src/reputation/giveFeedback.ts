@@ -6,8 +6,9 @@ import type { GiveFeedbackParameters } from './types.js'
 
 /**
  * Give feedback to an agent. The caller (msg.sender) is recorded as the
- * reviewer (client). Feedback includes a numeric value, two category tags,
- * and optional off-chain data (endpoint, URI, hash).
+ * reviewer (client). `value` is `int128` on-chain — negative values
+ * represent negative feedback. Two category tags and optional off-chain
+ * data (endpoint, URI, hash) can be attached.
  */
 export async function giveFeedback(
   walletClient: WalletClient,

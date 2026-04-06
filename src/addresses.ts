@@ -26,6 +26,13 @@ const ERC8004_REGISTRIES: Record<number, Erc8004Addresses> = {
   137: MAINNET_ADDRESSES, // Polygon (Polygonscan verified)
   42161: MAINNET_ADDRESSES, // Arbitrum (RPC verified, 8004scan indexes)
   10: MAINNET_ADDRESSES, // Optimism (RPC verified, erc-8004 repo)
+  43114: MAINNET_ADDRESSES, // Avalanche (CREATE2, erc-8004-contracts repo)
+  56: MAINNET_ADDRESSES, // BSC (CREATE2, erc-8004-contracts repo)
+  534352: MAINNET_ADDRESSES, // Scroll (CREATE2, erc-8004-contracts repo)
+  59144: MAINNET_ADDRESSES, // Linea (CREATE2, erc-8004-contracts repo)
+  5000: MAINNET_ADDRESSES, // Mantle (CREATE2, erc-8004-contracts repo)
+  100: MAINNET_ADDRESSES, // Gnosis (CREATE2, erc-8004-contracts repo)
+  42220: MAINNET_ADDRESSES, // Celo (CREATE2, erc-8004-contracts repo)
   // Testnets — verified via agent0-sdk + RPC
   84532: TESTNET_ADDRESSES, // Base Sepolia
   11155111: TESTNET_ADDRESSES, // Ethereum Sepolia

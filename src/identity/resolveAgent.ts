@@ -9,9 +9,8 @@ import type { ResolveAgentParameters, ResolvedAgent } from './types.js'
  * Throws if the agentId does not exist (ERC-721 reverts on non-existent tokens).
  * Use `verifyAgentId` first if you need a safe boolean check.
  *
- * If `owner !== agentWallet`, the agent NFT was transferred but the wallet
- * wasn't updated. `ownerMismatch` is set to true as a warning — callers
- * should decide which address to trust based on their use case.
+ * `agentWallet` is `address(0)` after NFT transfer or explicit `unsetAgentWallet()`.
+ * When `ownerMismatch` is true, use `owner` for the canonical address.
  */
 export async function resolveAgent(
   publicClient: PublicClient,

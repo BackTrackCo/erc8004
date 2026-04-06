@@ -35,6 +35,10 @@ export interface GetAgentWalletParameters {
   agentId: bigint
 }
 
+export interface GetVersionParameters {
+  registryAddress?: Address
+}
+
 export interface GetMetadataParameters {
   registryAddress?: Address
   agentId: bigint
@@ -60,6 +64,13 @@ export interface SetAgentWalletParameters {
   newWallet: Address
   deadline: bigint
   signature: Hex
+}
+
+export interface SignAgentWalletConsentParameters {
+  registryAddress?: Address
+  agentId: bigint
+  newWallet: Address
+  deadline: bigint
 }
 
 export interface UnsetAgentWalletParameters {
