@@ -2,7 +2,7 @@ import type { Address, Hex } from 'viem'
 
 export interface RegisterAgentParameters {
   registryAddress?: Address
-  agentURI: string
+  agentURI?: string
   metadata?: Array<{ key: string; value: Hex }>
 }
 
@@ -52,4 +52,17 @@ export interface SetAgentURIParameters {
   registryAddress?: Address
   agentId: bigint
   newURI: string
+}
+
+export interface SetAgentWalletParameters {
+  registryAddress?: Address
+  agentId: bigint
+  newWallet: Address
+  deadline: bigint
+  signature: Hex
+}
+
+export interface UnsetAgentWalletParameters {
+  registryAddress?: Address
+  agentId: bigint
 }

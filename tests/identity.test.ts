@@ -1,12 +1,23 @@
-import type { Address, PublicClient, WalletClient } from 'viem'
+import type {
+  Address,
+  Log,
+  PublicClient,
+  TransactionReceipt,
+  WalletClient,
+} from 'viem'
+import { encodeAbiParameters, encodeEventTopics, getAddress } from 'viem'
 import { describe, expect, it, vi } from 'vitest'
+import { identityRegistryAbi } from '../src/abis/index.js'
 import { getAgentWallet } from '../src/identity/getAgentWallet.js'
 import { getMetadata } from '../src/identity/getMetadata.js'
 import { isRegistered } from '../src/identity/isRegistered.js'
+import { parseRegisterReceipt } from '../src/identity/parseRegisterReceipt.js'
 import { registerAgent } from '../src/identity/register.js'
 import { resolveAgent } from '../src/identity/resolveAgent.js'
 import { setAgentURI } from '../src/identity/setAgentURI.js'
+import { setAgentWallet } from '../src/identity/setAgentWallet.js'
 import { setMetadata } from '../src/identity/setMetadata.js'
+import { unsetAgentWallet } from '../src/identity/unsetAgentWallet.js'
 import { verifyAgentId } from '../src/identity/verifyAgentId.js'
 import {
   ADDR_A,
@@ -78,6 +89,20 @@ describe('registerAgent', () => {
     expect(client.writeContract).toHaveBeenCalledWith(
       expect.objectContaining({
         args: ['https://example.com/agent.json'],
+      }),
+    )
+  })
+
+  it('uses zero-arg overload when agentURI is omitted', async () => {
+    const client = mockWallet()
+    await registerAgent(client, {
+      registryAddress: REGISTRY,
+    })
+
+    expect(client.writeContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        functionName: 'register',
+        args: [],
       }),
     )
   })
@@ -308,6 +333,117 @@ describe('setAgentURI', () => {
         functionName: 'setAgentURI',
         args: [42n, 'https://example.com/new.json'],
       }),
+    )
+  })
+})
+
+// --- setAgentWallet ---
+
+describe('setAgentWallet', () => {
+  it('throws when walletClient has no account', async () => {
+    await expect(
+      setAgentWallet(mockWallet({ account: undefined }), {
+        registryAddress: REGISTRY,
+        agentId: 1n,
+        newWallet: ADDR_B,
+        deadline: 1000000n,
+        signature: '0xabcd',
+      }),
+    ).rejects.toThrow('walletClient must have an account')
+  })
+
+  it('passes args in correct order', async () => {
+    const client = mockWallet()
+    await setAgentWallet(client, {
+      registryAddress: REGISTRY,
+      agentId: 42n,
+      newWallet: ADDR_B,
+      deadline: 1000000n,
+      signature: '0xabcd',
+    })
+
+    expect(client.writeContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        functionName: 'setAgentWallet',
+        args: [42n, ADDR_B, 1000000n, '0xabcd'],
+      }),
+    )
+  })
+})
+
+// --- unsetAgentWallet ---
+
+describe('unsetAgentWallet', () => {
+  it('throws when walletClient has no account', async () => {
+    await expect(
+      unsetAgentWallet(mockWallet({ account: undefined }), {
+        registryAddress: REGISTRY,
+        agentId: 1n,
+      }),
+    ).rejects.toThrow('walletClient must have an account')
+  })
+
+  it('passes agentId correctly', async () => {
+    const client = mockWallet()
+    await unsetAgentWallet(client, {
+      registryAddress: REGISTRY,
+      agentId: 42n,
+    })
+
+    expect(client.writeContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        functionName: 'unsetAgentWallet',
+        args: [42n],
+      }),
+    )
+  })
+})
+
+// --- parseRegisterReceipt ---
+
+describe('parseRegisterReceipt', () => {
+  function makeRegisteredLog(
+    agentId: bigint,
+    owner: Address,
+    agentURI: string,
+  ): Log {
+    const topics = encodeEventTopics({
+      abi: identityRegistryAbi,
+      eventName: 'Registered',
+      args: { agentId, owner: getAddress(owner) },
+    })
+    const data = encodeAbiParameters(
+      [{ type: 'string', name: 'agentURI' }],
+      [agentURI],
+    )
+    return {
+      address: REGISTRY,
+      topics,
+      data,
+      blockHash: '0x0',
+      blockNumber: 1n,
+      logIndex: 0,
+      transactionHash: '0x0',
+      transactionIndex: 0,
+      removed: false,
+    } as unknown as Log
+  }
+
+  it('extracts agentId, owner, and agentURI', () => {
+    const receipt = {
+      logs: [makeRegisteredLog(42n, ADDR_A, 'https://example.com/agent.json')],
+    } as unknown as TransactionReceipt
+
+    const result = parseRegisterReceipt(receipt)
+    expect(result.agentId).toBe(42n)
+    expect(result.owner).toBe(getAddress(ADDR_A))
+    expect(result.agentURI).toBe('https://example.com/agent.json')
+  })
+
+  it('throws when no Registered event in receipt', () => {
+    const receipt = { logs: [] } as unknown as TransactionReceipt
+    expect(() => parseRegisterReceipt(receipt)).toThrow(
+      'No Registered event found in receipt',
     )
   })
 })

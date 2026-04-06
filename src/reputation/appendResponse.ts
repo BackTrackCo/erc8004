@@ -1,4 +1,4 @@
-import type { Hash, WalletClient } from 'viem'
+import { type Hash, type WalletClient, zeroHash } from 'viem'
 import { reputationRegistryAbi } from '../abis/index.js'
 import { requireAccount } from '../internal/requireAccount.js'
 import { resolveReputationRegistry } from '../internal/resolveRegistryAddress.js'
@@ -27,7 +27,7 @@ export async function appendResponse(
       parameters.clientAddress,
       parameters.feedbackIndex,
       parameters.responseURI,
-      parameters.responseHash,
+      parameters.responseHash ?? zeroHash,
     ],
     chain: walletClient.chain,
     account,

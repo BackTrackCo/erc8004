@@ -28,7 +28,7 @@ export interface AppendResponseParameters {
   clientAddress: Address
   feedbackIndex: bigint
   responseURI: string
-  responseHash: Hex
+  responseHash?: Hex
 }
 
 // ---------------------------------------------------------------------------
@@ -61,6 +61,11 @@ export interface ReadAllFeedbackParameters {
   tag1: string
   tag2: string
   includeRevoked?: boolean
+}
+
+export interface ReadAllFeedbackBatchedParameters
+  extends ReadAllFeedbackParameters {
+  batchSize?: number
 }
 
 export interface FeedbackEntry {

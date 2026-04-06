@@ -1,13 +1,21 @@
-import type { PublicClient } from 'viem'
-import { zeroHash } from 'viem'
+import type { Address, Log, PublicClient, TransactionReceipt } from 'viem'
+import {
+  encodeAbiParameters,
+  encodeEventTopics,
+  getAddress,
+  zeroHash,
+} from 'viem'
 import { describe, expect, it, vi } from 'vitest'
+import { reputationRegistryAbi } from '../src/abis/index.js'
 import { appendResponse } from '../src/reputation/appendResponse.js'
 import { getClients } from '../src/reputation/getClients.js'
 import { getLastIndex } from '../src/reputation/getLastIndex.js'
 import { getResponseCount } from '../src/reputation/getResponseCount.js'
 import { getSummary } from '../src/reputation/getSummary.js'
 import { giveFeedback } from '../src/reputation/giveFeedback.js'
+import { parseGiveFeedbackReceipt } from '../src/reputation/parseGiveFeedbackReceipt.js'
 import { readAllFeedback } from '../src/reputation/readAllFeedback.js'
+import { readAllFeedbackBatched } from '../src/reputation/readAllFeedbackBatched.js'
 import { readFeedback } from '../src/reputation/readFeedback.js'
 import { revokeFeedback } from '../src/reputation/revokeFeedback.js'
 import {
@@ -340,6 +348,135 @@ describe('getResponseCount', () => {
     })
 
     expect(result).toBe(2n)
+  })
+})
+
+// --- readAllFeedbackBatched ---
+
+describe('readAllFeedbackBatched', () => {
+  it('delegates to readAllFeedback when within batch size', async () => {
+    const client = mockPublic({
+      readAllFeedback: [
+        [ADDR_A],
+        [1n],
+        [85n],
+        [0],
+        ['tag1'],
+        ['tag2'],
+        [false],
+      ],
+    })
+
+    const result = await readAllFeedbackBatched(client, {
+      registryAddress: REPUTATION_REGISTRY,
+      agentId: 42n,
+      clientAddresses: [ADDR_A],
+      tag1: 'tag1',
+      tag2: 'tag2',
+      batchSize: 50,
+    })
+
+    expect(result).toHaveLength(1)
+    expect(client.readContract).toHaveBeenCalledTimes(1)
+  })
+
+  it('chunks addresses into batches', async () => {
+    const addresses = Array.from(
+      { length: 5 },
+      (_, i) => `0x${String(i + 1).padStart(40, '0')}` as Address,
+    )
+
+    // Each batch returns one entry per address
+    const client = {
+      chain: { id: 8453 },
+      readContract: vi.fn(({ args }: { args: readonly unknown[] }) => {
+        const addrs = args[1] as Address[]
+        return Promise.resolve([
+          addrs,
+          addrs.map(() => 1n),
+          addrs.map(() => 85n),
+          addrs.map(() => 0),
+          addrs.map(() => 'tag1'),
+          addrs.map(() => 'tag2'),
+          addrs.map(() => false),
+        ])
+      }),
+    } as unknown as PublicClient
+
+    const result = await readAllFeedbackBatched(client, {
+      registryAddress: REPUTATION_REGISTRY,
+      agentId: 42n,
+      clientAddresses: addresses,
+      tag1: 'tag1',
+      tag2: 'tag2',
+      batchSize: 2,
+    })
+
+    // 5 addresses / batch size 2 = 3 RPC calls
+    expect(client.readContract).toHaveBeenCalledTimes(3)
+    expect(result).toHaveLength(5)
+  })
+})
+
+// --- parseGiveFeedbackReceipt ---
+
+describe('parseGiveFeedbackReceipt', () => {
+  function makeNewFeedbackLog(
+    agentId: bigint,
+    clientAddress: Address,
+    feedbackIndex: bigint,
+  ): Log {
+    const topics = encodeEventTopics({
+      abi: reputationRegistryAbi,
+      eventName: 'NewFeedback',
+      args: {
+        agentId,
+        clientAddress: getAddress(clientAddress),
+        indexedTag1: 'x402r.resolution',
+      },
+    })
+    const data = encodeAbiParameters(
+      [
+        { type: 'uint64', name: 'feedbackIndex' },
+        { type: 'int128', name: 'value' },
+        { type: 'uint8', name: 'valueDecimals' },
+        { type: 'string', name: 'tag1' },
+        { type: 'string', name: 'tag2' },
+        { type: 'string', name: 'endpoint' },
+        { type: 'string', name: 'feedbackURI' },
+        { type: 'bytes32', name: 'feedbackHash' },
+      ],
+      [feedbackIndex, 85n, 0, 'x402r.resolution', 'quality', '', '', zeroHash],
+    )
+    return {
+      address: REPUTATION_REGISTRY,
+      topics,
+      data,
+      blockHash: '0x0',
+      blockNumber: 1n,
+      logIndex: 0,
+      transactionHash: '0x0',
+      transactionIndex: 0,
+      removed: false,
+    } as unknown as Log
+  }
+
+  it('extracts agentId, clientAddress, and feedbackIndex', () => {
+    const receipt = {
+      logs: [makeNewFeedbackLog(42n, ADDR_A, 1n)],
+    } as unknown as TransactionReceipt
+
+    const result = parseGiveFeedbackReceipt(receipt)
+    expect(result.agentId).toBe(42n)
+    expect(result.clientAddress).toBe(getAddress(ADDR_A))
+    expect(result.feedbackIndex).toBe(1n)
+  })
+
+  it('throws when no NewFeedback event in receipt', () => {
+    const receipt = { logs: [] } as unknown as TransactionReceipt
+    expect(() => parseGiveFeedbackReceipt(receipt)).toThrow(
+      'No NewFeedback event found in receipt',
+    )
   })
 })
 

@@ -20,7 +20,7 @@ export async function registerAgent(
     parameters.registryAddress,
   )
 
-  if (metadata && metadata.length > 0) {
+  if (agentURI && metadata && metadata.length > 0) {
     return walletClient.writeContract({
       address: registry,
       abi: identityRegistryAbi,
@@ -37,11 +37,22 @@ export async function registerAgent(
     })
   }
 
+  if (agentURI) {
+    return walletClient.writeContract({
+      address: registry,
+      abi: identityRegistryAbi,
+      functionName: 'register',
+      args: [agentURI],
+      chain: walletClient.chain,
+      account,
+    })
+  }
+
   return walletClient.writeContract({
     address: registry,
     abi: identityRegistryAbi,
     functionName: 'register',
-    args: [agentURI],
+    args: [],
     chain: walletClient.chain,
     account,
   })

@@ -4,7 +4,10 @@ export { getLastIndex } from './getLastIndex.js'
 export { getResponseCount } from './getResponseCount.js'
 export { getSummary } from './getSummary.js'
 export { giveFeedback } from './giveFeedback.js'
+export type { GiveFeedbackResult } from './parseGiveFeedbackReceipt.js'
+export { parseGiveFeedbackReceipt } from './parseGiveFeedbackReceipt.js'
 export { readAllFeedback } from './readAllFeedback.js'
+export { readAllFeedbackBatched } from './readAllFeedbackBatched.js'
 export { readFeedback } from './readFeedback.js'
 export { revokeFeedback } from './revokeFeedback.js'
 
@@ -17,6 +20,7 @@ export type {
   GetResponseCountParameters,
   GetSummaryParameters,
   GiveFeedbackParameters,
+  ReadAllFeedbackBatchedParameters,
   ReadAllFeedbackParameters,
   ReadFeedbackParameters,
   ReputationSummary,
