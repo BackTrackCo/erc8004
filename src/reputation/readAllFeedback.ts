@@ -13,7 +13,7 @@ import type { FeedbackEntry, ReadAllFeedbackParameters } from './types.js'
 export async function readAllFeedback(
   publicClient: PublicClient,
   parameters: ReadAllFeedbackParameters,
-): Promise<FeedbackEntry[]> {
+): Promise<readonly FeedbackEntry[]> {
   const registry = resolveReputationRegistry(
     publicClient,
     parameters.registryAddress,
@@ -36,7 +36,7 @@ export async function readAllFeedback(
       parameters.clientAddresses,
       parameters.tag1,
       parameters.tag2,
-      parameters.includeRevoked,
+      parameters.includeRevoked ?? false,
     ],
   })
 

@@ -11,9 +11,9 @@ export interface GiveFeedbackParameters {
   valueDecimals: number
   tag1: string
   tag2: string
-  endpoint: string
-  feedbackURI: string
-  feedbackHash: Hex
+  endpoint?: string
+  feedbackURI?: string
+  feedbackHash?: Hex
 }
 
 export interface RevokeFeedbackParameters {
@@ -60,7 +60,7 @@ export interface ReadAllFeedbackParameters {
   clientAddresses: readonly Address[]
   tag1: string
   tag2: string
-  includeRevoked: boolean
+  includeRevoked?: boolean
 }
 
 export interface FeedbackEntry {

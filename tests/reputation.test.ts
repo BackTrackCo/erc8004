@@ -224,6 +224,11 @@ describe('readAllFeedback', () => {
       includeRevoked: false,
     })
 
+    expect(client.readContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        args: expect.arrayContaining([false]),
+      }),
+    )
     expect(result).toEqual([
       {
         client: ADDR_A,

@@ -5,8 +5,8 @@ import { resolveReputationRegistry } from '../internal/resolveRegistryAddress.js
 import type { AppendResponseParameters } from './types.js'
 
 /**
- * Append a response to existing feedback. Typically called by the agent
- * owner to respond to a reviewer's feedback.
+ * Append a response to existing feedback.
+ * Reverts if `msg.sender` is not the owner of `agentId`.
  */
 export async function appendResponse(
   walletClient: WalletClient,

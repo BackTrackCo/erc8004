@@ -1,4 +1,4 @@
-import type { Hash, WalletClient } from 'viem'
+import { type Hash, type WalletClient, zeroHash } from 'viem'
 import { reputationRegistryAbi } from '../abis/index.js'
 import { requireAccount } from '../internal/requireAccount.js'
 import { resolveReputationRegistry } from '../internal/resolveRegistryAddress.js'
@@ -29,9 +29,9 @@ export async function giveFeedback(
       parameters.valueDecimals,
       parameters.tag1,
       parameters.tag2,
-      parameters.endpoint,
-      parameters.feedbackURI,
-      parameters.feedbackHash,
+      parameters.endpoint ?? '',
+      parameters.feedbackURI ?? '',
+      parameters.feedbackHash ?? zeroHash,
     ],
     chain: walletClient.chain,
     account,

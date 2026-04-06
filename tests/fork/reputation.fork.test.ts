@@ -1,5 +1,5 @@
 import type { PublicClient, WalletClient } from 'viem'
-import { parseEventLogs, zeroHash } from 'viem'
+import { isAddressEqual, parseEventLogs, zeroHash } from 'viem'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { identityRegistryAbi } from '../../src/abis/index.js'
 import { registerAgent } from '../../src/identity/register.js'
@@ -56,8 +56,8 @@ describe('Reputation Registry (fork)', () => {
 
   it('getClients includes the feedback giver', async () => {
     const clients = await getClients(publicClient, { agentId })
-    expect(clients.map((c) => c.toLowerCase())).toContain(
-      accounts[1].address.toLowerCase(),
+    expect(clients.some((c) => isAddressEqual(c, accounts[1].address))).toBe(
+      true,
     )
   })
 
@@ -97,6 +97,7 @@ describe('Reputation Registry (fork)', () => {
 
     expect(summary.count).toBe(1n)
     expect(summary.summaryValue).toBe(85n)
+    expect(summary.summaryValueDecimals).toBe(0)
   })
 
   it('readAllFeedback returns structured entries', async () => {
@@ -109,9 +110,7 @@ describe('Reputation Registry (fork)', () => {
     })
 
     expect(entries).toHaveLength(1)
-    expect(entries[0].client.toLowerCase()).toBe(
-      accounts[1].address.toLowerCase(),
-    )
+    expect(isAddressEqual(entries[0].client, accounts[1].address)).toBe(true)
     expect(entries[0].feedbackIndex).toBe(1n)
     expect(entries[0].value).toBe(85n)
     expect(entries[0].valueDecimals).toBe(0)
