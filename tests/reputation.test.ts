@@ -15,7 +15,6 @@ import { getSummary } from '../src/reputation/getSummary.js'
 import { giveFeedback } from '../src/reputation/giveFeedback.js'
 import { parseGiveFeedbackReceipt } from '../src/reputation/parseGiveFeedbackReceipt.js'
 import { readAllFeedback } from '../src/reputation/readAllFeedback.js'
-import { readAllFeedbackBatched } from '../src/reputation/readAllFeedbackBatched.js'
 import { readFeedback } from '../src/reputation/readFeedback.js'
 import { revokeFeedback } from '../src/reputation/revokeFeedback.js'
 import {
@@ -351,10 +350,10 @@ describe('getResponseCount', () => {
   })
 })
 
-// --- readAllFeedbackBatched ---
+// --- readAllFeedback batchSize ---
 
-describe('readAllFeedbackBatched', () => {
-  it('delegates to readAllFeedback when within batch size', async () => {
+describe('readAllFeedback batchSize', () => {
+  it('makes a single call when within batch size', async () => {
     const client = mockPublic({
       readAllFeedback: [
         [ADDR_A],
@@ -367,7 +366,7 @@ describe('readAllFeedbackBatched', () => {
       ],
     })
 
-    const result = await readAllFeedbackBatched(client, {
+    const result = await readAllFeedback(client, {
       registryAddress: REPUTATION_REGISTRY,
       agentId: 42n,
       clientAddresses: [ADDR_A],
@@ -403,7 +402,7 @@ describe('readAllFeedbackBatched', () => {
       }),
     } as unknown as PublicClient
 
-    const result = await readAllFeedbackBatched(client, {
+    const result = await readAllFeedback(client, {
       registryAddress: REPUTATION_REGISTRY,
       agentId: 42n,
       clientAddresses: addresses,
@@ -461,15 +460,24 @@ describe('parseGiveFeedbackReceipt', () => {
     } as unknown as Log
   }
 
-  it('extracts agentId, clientAddress, and feedbackIndex', () => {
+  it('extracts all event fields', () => {
     const receipt = {
       logs: [makeNewFeedbackLog(42n, ADDR_A, 1n)],
     } as unknown as TransactionReceipt
 
     const result = parseGiveFeedbackReceipt(receipt)
-    expect(result.agentId).toBe(42n)
-    expect(result.clientAddress).toBe(getAddress(ADDR_A))
-    expect(result.feedbackIndex).toBe(1n)
+    expect(result).toEqual({
+      agentId: 42n,
+      clientAddress: getAddress(ADDR_A),
+      feedbackIndex: 1n,
+      value: 85n,
+      valueDecimals: 0,
+      tag1: 'x402r.resolution',
+      tag2: 'quality',
+      endpoint: '',
+      feedbackURI: '',
+      feedbackHash: zeroHash,
+    })
   })
 
   it('throws when no NewFeedback event in receipt', () => {

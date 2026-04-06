@@ -9,10 +9,36 @@ import type { FeedbackEntry, ReadAllFeedbackParameters } from './types.js'
  *
  * The contract returns 7 parallel arrays — this function transforms them
  * into an array of structured objects for better DX.
+ *
+ * Pass `batchSize` to chunk `clientAddresses` into multiple RPC calls,
+ * avoiding response size limits for agents with many reviewers.
+ * Defaults to a single call when `batchSize` is omitted.
  */
 export async function readAllFeedback(
   publicClient: PublicClient,
   parameters: ReadAllFeedbackParameters,
+): Promise<readonly FeedbackEntry[]> {
+  const { batchSize, ...rest } = parameters
+
+  if (batchSize && rest.clientAddresses.length > batchSize) {
+    const results: FeedbackEntry[] = []
+    for (let i = 0; i < rest.clientAddresses.length; i += batchSize) {
+      const chunk = rest.clientAddresses.slice(i, i + batchSize)
+      const batch = await readAllFeedbackSingle(publicClient, {
+        ...rest,
+        clientAddresses: chunk,
+      })
+      results.push(...batch)
+    }
+    return results
+  }
+
+  return readAllFeedbackSingle(publicClient, rest)
+}
+
+async function readAllFeedbackSingle(
+  publicClient: PublicClient,
+  parameters: Omit<ReadAllFeedbackParameters, 'batchSize'>,
 ): Promise<readonly FeedbackEntry[]> {
   const registry = resolveReputationRegistry(
     publicClient,

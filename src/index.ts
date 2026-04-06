@@ -8,6 +8,7 @@ export {
 export type {
   GetAgentWalletParameters,
   GetMetadataParameters,
+  GetVersionParameters,
   IsRegisteredParameters,
   MetadataSetResult,
   RegisterAgentParameters,
@@ -51,7 +52,6 @@ export type {
   GetSummaryParameters,
   GiveFeedbackParameters,
   GiveFeedbackResult,
-  ReadAllFeedbackBatchedParameters,
   ReadAllFeedbackParameters,
   ReadFeedbackParameters,
   ReputationSummary,
@@ -71,7 +71,6 @@ export {
   parseGiveFeedbackReceipt,
   parseResponseAppendedReceipt,
   readAllFeedback,
-  readAllFeedbackBatched,
   readFeedback,
   revokeFeedback,
 } from './reputation/index.js'

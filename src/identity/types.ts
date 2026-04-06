@@ -1,4 +1,4 @@
-import type { Address, Hex } from 'viem'
+import type { Address, Hex, PublicClient } from 'viem'
 
 export interface RegisterAgentParameters {
   registryAddress?: Address
@@ -67,6 +67,8 @@ export interface SetAgentWalletParameters {
 }
 
 export interface SignAgentWalletConsentParameters {
+  /** PublicClient for reading the current agent owner from the registry. */
+  publicClient: PublicClient
   registryAddress?: Address
   agentId: bigint
   newWallet: Address

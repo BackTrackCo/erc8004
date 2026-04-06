@@ -17,5 +17,5 @@ export async function getIdentityRegistry(
     address: registry,
     abi: reputationRegistryAbi,
     functionName: 'getIdentityRegistry',
-  }) as Promise<Address>
+  })
 }

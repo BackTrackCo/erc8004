@@ -13,7 +13,6 @@ export { parseGiveFeedbackReceipt } from './parseGiveFeedbackReceipt.js'
 export type { ResponseAppendedResult } from './parseResponseAppendedReceipt.js'
 export { parseResponseAppendedReceipt } from './parseResponseAppendedReceipt.js'
 export { readAllFeedback } from './readAllFeedback.js'
-export { readAllFeedbackBatched } from './readAllFeedbackBatched.js'
 export { readFeedback } from './readFeedback.js'
 export { revokeFeedback } from './revokeFeedback.js'
 
@@ -28,7 +27,6 @@ export type {
   GetSummaryParameters,
   GetVersionParameters,
   GiveFeedbackParameters,
-  ReadAllFeedbackBatchedParameters,
   ReadAllFeedbackParameters,
   ReadFeedbackParameters,
   ReputationSummary,

@@ -27,7 +27,7 @@ Initial alpha release.
 - `parseFeedbackRevokedReceipt` — extract fields from revokeFeedback transaction receipt
 - `appendResponse` — append a response to existing feedback
 - `parseResponseAppendedReceipt` — extract fields from appendResponse transaction receipt
-- `readFeedback` / `readAllFeedback` / `readAllFeedbackBatched` — read feedback entries
+- `readFeedback` / `readAllFeedback` — read feedback entries (optional `batchSize` for large reviewer sets)
 - `getSummary` — aggregated reputation summary
 - `getClients` — all reviewer addresses for an agent
 - `getLastIndex` — latest feedback index for an agent-client pair

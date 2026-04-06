@@ -1,4 +1,9 @@
-import { type Address, parseEventLogs, type TransactionReceipt } from 'viem'
+import {
+  type Address,
+  type Hex,
+  parseEventLogs,
+  type TransactionReceipt,
+} from 'viem'
 import { reputationRegistryAbi } from '../abis/index.js'
 
 export interface GiveFeedbackResult {
@@ -11,7 +16,7 @@ export interface GiveFeedbackResult {
   tag2: string
   endpoint: string
   feedbackURI: string
-  feedbackHash: `0x${string}`
+  feedbackHash: Hex
 }
 
 /**

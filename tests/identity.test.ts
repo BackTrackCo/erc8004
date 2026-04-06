@@ -123,6 +123,15 @@ describe('registerAgent', () => {
     )
   })
 
+  it('throws when metadata provided without agentURI', async () => {
+    await expect(
+      registerAgent(mockWallet(), {
+        registryAddress: REGISTRY,
+        metadata: [{ key: 'k', value: '0xabcd' }],
+      }),
+    ).rejects.toThrow('metadata requires agentURI')
+  })
+
   it('propagates writeContract rejection', async () => {
     const client = {
       ...mockWallet(),
@@ -418,16 +427,31 @@ describe('unsetAgentWallet', () => {
 // --- signAgentWalletConsent ---
 
 describe('signAgentWalletConsent', () => {
+  it('throws when walletClient has no account', async () => {
+    const publicClient = mockPublic({ ownerOf: ADDR_A })
+    await expect(
+      signAgentWalletConsent(mockWallet({ account: undefined }), {
+        publicClient,
+        registryAddress: REGISTRY,
+        agentId: 1n,
+        newWallet: ADDR_B,
+        deadline: 1000000n,
+      }),
+    ).rejects.toThrow('walletClient must have an account')
+  })
+
   it('reads ownerOf and calls signTypedData with correct EIP-712 structure', async () => {
     const signTypedData = vi.fn().mockResolvedValue('0xsig')
     const walletClient = {
       account: { address: ADDR_B },
+      chain: { id: 8453 },
       signTypedData,
     } as unknown as WalletClient
 
     const publicClient = mockPublic({ ownerOf: ADDR_A })
 
-    await signAgentWalletConsent(walletClient, publicClient, {
+    await signAgentWalletConsent(walletClient, {
+      publicClient,
       registryAddress: REGISTRY,
       agentId: 42n,
       newWallet: ADDR_B,
@@ -442,17 +466,19 @@ describe('signAgentWalletConsent', () => {
     )
     expect(signTypedData).toHaveBeenCalledWith(
       expect.objectContaining({
-        domain: expect.objectContaining({
+        domain: {
           name: 'ERC8004IdentityRegistry',
           version: '1',
-        }),
+          chainId: 8453n,
+          verifyingContract: REGISTRY,
+        },
         primaryType: 'AgentWalletSet',
-        message: expect.objectContaining({
+        message: {
           agentId: 42n,
           newWallet: ADDR_B,
           owner: ADDR_A,
           deadline: 1000000n,
-        }),
+        },
       }),
     )
   })

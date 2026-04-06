@@ -17,5 +17,5 @@ export async function getVersion(
     address: registry,
     abi: reputationRegistryAbi,
     functionName: 'getVersion',
-  }) as Promise<string>
+  })
 }

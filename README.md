@@ -91,8 +91,7 @@ const summary = await getSummary(publicClient, {
 | `appendResponse` | Append a response to feedback |
 | `parseResponseAppendedReceipt` | Extract fields from `appendResponse` tx receipt |
 | `readFeedback` | Read a single feedback entry |
-| `readAllFeedback` | Read all feedback (filtered by reviewers and tags) |
-| `readAllFeedbackBatched` | Batched version — chunks `clientAddresses` to avoid RPC limits |
+| `readAllFeedback` | Read all feedback (filtered by reviewers and tags, optional `batchSize`) |
 | `getSummary` | Aggregated reputation summary |
 | `getClients` | All addresses that have given feedback |
 | `getLastIndex` | Latest feedback index for an agent-client pair |
