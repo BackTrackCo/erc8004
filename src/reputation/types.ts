@@ -1,12 +1,25 @@
 import type { Address, Hex } from 'viem'
 
 // ---------------------------------------------------------------------------
+// Utility parameters
+// ---------------------------------------------------------------------------
+
+export interface GetVersionParameters {
+  registryAddress?: Address
+}
+
+export interface GetIdentityRegistryParameters {
+  registryAddress?: Address
+}
+
+// ---------------------------------------------------------------------------
 // Write parameters
 // ---------------------------------------------------------------------------
 
 export interface GiveFeedbackParameters {
   registryAddress?: Address
   agentId: bigint
+  /** int128 on-chain — negative values represent negative feedback. */
   value: bigint
   valueDecimals: number
   tag1: string
@@ -28,7 +41,7 @@ export interface AppendResponseParameters {
   clientAddress: Address
   feedbackIndex: bigint
   responseURI: string
-  responseHash: Hex
+  responseHash?: Hex
 }
 
 // ---------------------------------------------------------------------------
@@ -61,6 +74,8 @@ export interface ReadAllFeedbackParameters {
   tag1: string
   tag2: string
   includeRevoked?: boolean
+  /** Chunk clientAddresses into batches of this size to avoid RPC limits. */
+  batchSize?: number
 }
 
 export interface FeedbackEntry {

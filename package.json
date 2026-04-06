@@ -1,12 +1,20 @@
 {
   "name": "@x402r/erc8004",
-  "version": "0.0.0",
+  "version": "0.1.0-alpha.0",
   "description": "Lightweight TypeScript SDK for ERC-8004 (Trustless Agents) — Identity and Reputation registries",
   "type": "module",
   "license": "Apache-2.0",
   "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BackTrackCo/erc8004.git"
+  },
+  "homepage": "https://github.com/BackTrackCo/erc8004#readme",
+  "bugs": {
+    "url": "https://github.com/BackTrackCo/erc8004/issues"
+  },
   "engines": {
-    "node": ">=22"
+    "node": ">=18"
   },
   "packageManager": "pnpm@10.23.0",
   "files": [

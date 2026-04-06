@@ -20,7 +20,13 @@ export async function registerAgent(
     parameters.registryAddress,
   )
 
-  if (metadata && metadata.length > 0) {
+  if (agentURI === undefined && metadata && metadata.length > 0) {
+    throw new Error(
+      'metadata requires agentURI: the contract has no register(metadata) overload without a URI',
+    )
+  }
+
+  if (agentURI !== undefined && metadata && metadata.length > 0) {
     return walletClient.writeContract({
       address: registry,
       abi: identityRegistryAbi,
@@ -37,11 +43,22 @@ export async function registerAgent(
     })
   }
 
+  if (agentURI !== undefined) {
+    return walletClient.writeContract({
+      address: registry,
+      abi: identityRegistryAbi,
+      functionName: 'register',
+      args: [agentURI],
+      chain: walletClient.chain,
+      account,
+    })
+  }
+
   return walletClient.writeContract({
     address: registry,
     abi: identityRegistryAbi,
     functionName: 'register',
-    args: [agentURI],
+    args: [],
     chain: walletClient.chain,
     account,
   })
