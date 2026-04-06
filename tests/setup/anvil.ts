@@ -73,6 +73,7 @@ function defineAnvil(options: {
         chain,
         transport,
         cacheTime: 0,
+        pollingInterval: 100,
       })
     },
 
@@ -98,8 +99,13 @@ function defineAnvil(options: {
 // Pre-configured instance for Base Sepolia fork
 // ---------------------------------------------------------------------------
 
+const forkUrl = process.env.FORK_URL ?? 'https://sepolia.base.org'
+if (!process.env.FORK_URL) {
+  console.warn('FORK_URL not set, using public RPC (rate-limited)')
+}
+
 export const anvilBaseSepolia = defineAnvil({
   chain: baseSepolia,
-  forkUrl: process.env.FORK_URL ?? 'https://sepolia.base.org',
+  forkUrl,
   port: 8745,
 })
