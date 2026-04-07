@@ -5,6 +5,7 @@ export default defineConfig({
     index: 'src/index.ts',
     'identity/index': 'src/identity/index.ts',
     'reputation/index': 'src/reputation/index.ts',
+    'registration/index': 'src/registration/index.ts',
     'abis/index': 'src/abis/index.ts',
   },
   format: ['esm'],

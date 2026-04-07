@@ -1,6 +1,6 @@
 {
   "name": "@x402r/erc8004",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "description": "Lightweight TypeScript SDK for ERC-8004 (Trustless Agents) — Identity and Reputation registries",
   "type": "module",
   "license": "Apache-2.0",
@@ -33,6 +33,10 @@
     "./reputation": {
       "types": "./dist/reputation/index.d.ts",
       "default": "./dist/reputation/index.js"
+    },
+    "./registration": {
+      "types": "./dist/registration/index.d.ts",
+      "default": "./dist/registration/index.js"
     },
     "./abis": {
       "types": "./dist/abis/index.d.ts",
