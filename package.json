@@ -88,6 +88,10 @@
       "limit": "5 kB"
     },
     {
+      "path": "dist/registration/index.js",
+      "limit": "5 kB"
+    },
+    {
       "path": "dist/abis/index.js",
       "limit": "50 kB"
     }

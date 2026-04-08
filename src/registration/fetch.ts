@@ -15,12 +15,19 @@ export async function fetchRegistrationFile(
     throw new Error(`Only HTTPS URIs are supported, got: ${uri.slice(0, 40)}`)
   }
 
-  const response = await globalThis.fetch(uri)
+  const response = await globalThis.fetch(uri, {
+    signal: AbortSignal.timeout(10_000),
+  })
 
   if (!response.ok) {
     throw new Error(
       `Failed to fetch registration file: HTTP ${response.status}`,
     )
+  }
+
+  const contentLength = response.headers.get('content-length')
+  if (contentLength && Number(contentLength) > 1_048_576) {
+    throw new Error('Registration file exceeds 1 MB size limit')
   }
 
   let json: unknown

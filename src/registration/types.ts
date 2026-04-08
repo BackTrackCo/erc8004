@@ -1,5 +1,10 @@
+import type { Address } from 'viem'
+
+export const REGISTRATION_TYPE =
+  'https://eips.ethereum.org/EIPS/eip-8004#registration-v1' as const
+
 export interface AgentRegistrationFile {
-  type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1'
+  type: typeof REGISTRATION_TYPE
   name: string
   description: string
   image: string
@@ -18,6 +23,23 @@ export interface ServiceEntry {
 }
 
 export interface RegistrationBinding {
-  agentId: number
-  agentRegistry: string // "eip155:{chainId}:{registryAddress}"
+  agentId: bigint
+  agentRegistry: `eip155:${number}:0x${string}`
+}
+
+export type CreateRegistrationFileParameters = Omit<
+  AgentRegistrationFile,
+  'type'
+>
+
+export interface ResolveServiceEndpointParameters {
+  agentId: bigint
+  serviceName: string
+  registryAddress?: Address
+}
+
+export interface ResolvedServiceEndpoint {
+  endpoint: string
+  service: ServiceEntry
+  agentURI: string
 }

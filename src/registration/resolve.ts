@@ -1,26 +1,25 @@
-import type { Address, PublicClient } from 'viem'
+import type { PublicClient } from 'viem'
 import { resolveAgent } from '../identity/index.js'
 import { fetchRegistrationFile } from './fetch.js'
 import { findService } from './services.js'
-
-export interface ResolveServiceEndpointParameters {
-  agentId: bigint
-  serviceName: string
-  registryAddress?: Address
-}
+import type {
+  AgentRegistrationFile,
+  ResolvedServiceEndpoint,
+  ResolveServiceEndpointParameters,
+} from './types.js'
 
 /**
  * Resolve a service endpoint for an on-chain agent in one call.
  *
  * Pipeline: `resolveAgent(agentId)` → `fetchRegistrationFile(agentURI)`
- * → `findService(file, serviceName)` → return endpoint.
+ * → `findService(file, serviceName)` → return endpoint + metadata.
  *
  * @throws if the agent doesn't exist, the URI fetch fails, or the service is not found
  */
 export async function resolveServiceEndpoint(
   publicClient: PublicClient,
   parameters: ResolveServiceEndpointParameters,
-): Promise<string> {
+): Promise<ResolvedServiceEndpoint> {
   const agent = await resolveAgent(publicClient, {
     agentId: parameters.agentId,
     registryAddress: parameters.registryAddress,
@@ -30,7 +29,14 @@ export async function resolveServiceEndpoint(
     throw new Error(`Agent ${parameters.agentId} has no URI set`)
   }
 
-  const file = await fetchRegistrationFile(agent.agentURI)
+  let file: AgentRegistrationFile
+  try {
+    file = await fetchRegistrationFile(agent.agentURI)
+  } catch (error) {
+    throw new Error(
+      `Agent ${parameters.agentId}: ${error instanceof Error ? error.message : String(error)}`,
+    )
+  }
 
   const service = findService(file, parameters.serviceName)
   if (!service) {
@@ -39,5 +45,9 @@ export async function resolveServiceEndpoint(
     )
   }
 
-  return service.endpoint
+  return {
+    endpoint: service.endpoint,
+    service,
+    agentURI: agent.agentURI,
+  }
 }

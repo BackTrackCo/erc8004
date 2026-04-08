@@ -1,12 +1,12 @@
 import type { PublicClient } from 'viem'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createRegistrationFile } from '../src/registration/build.js'
 import { fetchRegistrationFile } from '../src/registration/fetch.js'
 import { parseRegistrationFile } from '../src/registration/parse.js'
 import { resolveServiceEndpoint } from '../src/registration/resolve.js'
 import { findService, findServices } from '../src/registration/services.js'
 import type { AgentRegistrationFile } from '../src/registration/types.js'
-import { REGISTRY } from './setup/mocks.js'
+import { ADDR_A, REGISTRY } from './setup/mocks.js'
 
 const SPEC_TYPE = 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1'
 
@@ -81,6 +81,14 @@ describe('parseRegistrationFile', () => {
     )
   })
 
+  it('throws when a service entry is a primitive', () => {
+    const payload = validPayload()
+    payload.services = ['https://example.com']
+    expect(() => parseRegistrationFile(payload)).toThrow(
+      'services[0] must be an object',
+    )
+  })
+
   it('throws on non-object input', () => {
     expect(() => parseRegistrationFile('string')).toThrow(
       'must be a JSON object',
@@ -97,6 +105,47 @@ describe('parseRegistrationFile', () => {
         `"${field}" must be a string`,
       )
     }
+  })
+
+  it('throws when x402Support is present but not boolean', () => {
+    const payload = validPayload()
+    payload.x402Support = 'yes'
+    expect(() => parseRegistrationFile(payload)).toThrow(
+      '"x402Support" must be a boolean',
+    )
+  })
+
+  it('throws when active is present but not boolean', () => {
+    const payload = validPayload()
+    payload.active = 1
+    expect(() => parseRegistrationFile(payload)).toThrow(
+      '"active" must be a boolean',
+    )
+  })
+
+  it('throws when registrations is present but not an array', () => {
+    const payload = validPayload()
+    payload.registrations = 'invalid'
+    expect(() => parseRegistrationFile(payload)).toThrow(
+      '"registrations" must be an array',
+    )
+  })
+
+  it('throws when supportedTrust contains non-strings', () => {
+    const payload = validPayload()
+    payload.supportedTrust = [123]
+    expect(() => parseRegistrationFile(payload)).toThrow(
+      'supportedTrust[0] must be a string',
+    )
+  })
+
+  it('coerces registrations agentId to bigint', () => {
+    const payload = validPayload()
+    payload.registrations = [
+      { agentId: 42, agentRegistry: 'eip155:8453:0xabc' },
+    ]
+    const result = parseRegistrationFile(payload)
+    expect(result.registrations![0].agentId).toBe(42n)
   })
 })
 
@@ -121,7 +170,7 @@ describe('createRegistrationFile', () => {
       services: [{ name: 'web', endpoint: 'https://example.com' }],
       x402Support: true,
       active: false,
-      registrations: [{ agentId: 42, agentRegistry: 'eip155:8453:0xabc' }],
+      registrations: [{ agentId: 42n, agentRegistry: 'eip155:8453:0xabc' }],
       supportedTrust: ['ERC-8004'],
     })
     expect(file.x402Support).toBe(true)
@@ -197,20 +246,21 @@ describe('findServices', () => {
 // --- fetchRegistrationFile ---
 
 describe('fetchRegistrationFile', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
   it('fetches and parses a valid registration file', async () => {
     const payload = validPayload()
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
+        headers: new Headers(),
         json: () => Promise.resolve(payload),
       }),
     )
 
     const result = await fetchRegistrationFile('https://example.com/agent.json')
     expect(result.name).toBe('My Agent')
-
-    vi.unstubAllGlobals()
   })
 
   it('throws on non-HTTPS URL', async () => {
@@ -228,8 +278,6 @@ describe('fetchRegistrationFile', () => {
     await expect(
       fetchRegistrationFile('https://example.com/agent.json'),
     ).rejects.toThrow('HTTP 404')
-
-    vi.unstubAllGlobals()
   })
 
   it('throws on invalid JSON response', async () => {
@@ -237,6 +285,7 @@ describe('fetchRegistrationFile', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
+        headers: new Headers(),
         json: () => Promise.reject(new Error('Unexpected token')),
       }),
     )
@@ -244,47 +293,86 @@ describe('fetchRegistrationFile', () => {
     await expect(
       fetchRegistrationFile('https://example.com/agent.json'),
     ).rejects.toThrow('not valid JSON')
+  })
 
-    vi.unstubAllGlobals()
+  it('passes abort signal to fetch', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((_url: string, init?: RequestInit) => {
+        expect(init?.signal).toBeDefined()
+        return Promise.resolve({
+          ok: true,
+          headers: new Headers(),
+          json: () => Promise.resolve(validPayload()),
+        })
+      }),
+    )
+
+    await fetchRegistrationFile('https://example.com/agent.json')
+  })
+
+  it('throws when content-length exceeds limit', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        headers: new Headers({ 'content-length': '2000000' }),
+        json: () => Promise.resolve(validPayload()),
+      }),
+    )
+
+    await expect(
+      fetchRegistrationFile('https://example.com/huge'),
+    ).rejects.toThrow('exceeds 1 MB')
   })
 })
 
 // --- resolveServiceEndpoint ---
 
 describe('resolveServiceEndpoint', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
   const registrationPayload = validPayload()
+
+  function mockReadContract(overrides: Partial<Record<string, unknown>> = {}) {
+    const defaults: Record<string, unknown> = {
+      ownerOf: ADDR_A,
+      getAgentWallet: ADDR_A,
+      tokenURI: 'https://example.com/agent.json',
+      ...overrides,
+    }
+    return {
+      chain: { id: 8453 },
+      readContract: vi.fn(({ functionName }: { functionName: string }) => {
+        if (functionName in defaults)
+          return Promise.resolve(defaults[functionName])
+        return Promise.reject(new Error(`unexpected: ${functionName}`))
+      }),
+    } as unknown as PublicClient
+  }
 
   it('resolves an endpoint through the full pipeline', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
+        headers: new Headers(),
         json: () => Promise.resolve(registrationPayload),
       }),
     )
 
-    const publicClient = {
-      chain: { id: 8453 },
-      readContract: vi.fn(({ functionName }: { functionName: string }) => {
-        if (functionName === 'ownerOf')
-          return Promise.resolve('0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-        if (functionName === 'getAgentWallet')
-          return Promise.resolve('0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-        if (functionName === 'tokenURI')
-          return Promise.resolve('https://example.com/agent.json')
-        return Promise.reject(new Error(`unexpected: ${functionName}`))
-      }),
-    } as unknown as PublicClient
-
-    const endpoint = await resolveServiceEndpoint(publicClient, {
+    const result = await resolveServiceEndpoint(mockReadContract(), {
       agentId: 42n,
       serviceName: 'web',
       registryAddress: REGISTRY,
     })
 
-    expect(endpoint).toBe('https://example.com')
-
-    vi.unstubAllGlobals()
+    expect(result.endpoint).toBe('https://example.com')
+    expect(result.service).toEqual({
+      name: 'web',
+      endpoint: 'https://example.com',
+    })
+    expect(result.agentURI).toBe('https://example.com/agent.json')
   })
 
   it('throws when the service is not found', async () => {
@@ -292,31 +380,42 @@ describe('resolveServiceEndpoint', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
+        headers: new Headers(),
         json: () => Promise.resolve(registrationPayload),
       }),
     )
 
-    const publicClient = {
-      chain: { id: 8453 },
-      readContract: vi.fn(({ functionName }: { functionName: string }) => {
-        if (functionName === 'ownerOf')
-          return Promise.resolve('0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-        if (functionName === 'getAgentWallet')
-          return Promise.resolve('0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-        if (functionName === 'tokenURI')
-          return Promise.resolve('https://example.com/agent.json')
-        return Promise.reject(new Error(`unexpected: ${functionName}`))
-      }),
-    } as unknown as PublicClient
-
     await expect(
-      resolveServiceEndpoint(publicClient, {
+      resolveServiceEndpoint(mockReadContract(), {
         agentId: 42n,
         serviceName: 'nonexistent',
         registryAddress: REGISTRY,
       }),
     ).rejects.toThrow('Service "nonexistent" not found')
+  })
 
-    vi.unstubAllGlobals()
+  it('throws when agent has no URI set', async () => {
+    await expect(
+      resolveServiceEndpoint(mockReadContract({ tokenURI: '' }), {
+        agentId: 42n,
+        serviceName: 'web',
+        registryAddress: REGISTRY,
+      }),
+    ).rejects.toThrow('Agent 42 has no URI set')
+  })
+
+  it('includes agent ID in fetch error messages', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: false, status: 500 }),
+    )
+
+    await expect(
+      resolveServiceEndpoint(mockReadContract(), {
+        agentId: 42n,
+        serviceName: 'web',
+        registryAddress: REGISTRY,
+      }),
+    ).rejects.toThrow('Agent 42')
   })
 })

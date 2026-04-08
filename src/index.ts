@@ -44,6 +44,7 @@ export type {
   AgentRegistrationFile,
   CreateRegistrationFileParameters,
   RegistrationBinding,
+  ResolvedServiceEndpoint,
   ResolveServiceEndpointParameters,
   ServiceEntry,
 } from './registration/index.js'
@@ -53,6 +54,7 @@ export {
   findService,
   findServices,
   parseRegistrationFile,
+  REGISTRATION_TYPE,
   resolveServiceEndpoint,
 } from './registration/index.js'
 export type {
