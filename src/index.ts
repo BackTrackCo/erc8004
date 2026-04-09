@@ -41,6 +41,23 @@ export {
   verifyAgentId,
 } from './identity/index.js'
 export type {
+  AgentRegistrationFile,
+  CreateRegistrationFileParameters,
+  RegistrationBinding,
+  ResolvedServiceEndpoint,
+  ResolveServiceEndpointParameters,
+  ServiceEntry,
+} from './registration/index.js'
+export {
+  createRegistrationFile,
+  fetchRegistrationFile,
+  findService,
+  findServices,
+  parseRegistrationFile,
+  REGISTRATION_TYPE,
+  resolveServiceEndpoint,
+} from './registration/index.js'
+export type {
   AppendResponseParameters,
   Feedback,
   FeedbackEntry,
