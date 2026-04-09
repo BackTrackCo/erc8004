@@ -123,6 +123,43 @@ describe('parseRegistrationFile', () => {
     )
   })
 
+  it('throws when a registrations entry is a primitive', () => {
+    const payload = validPayload()
+    payload.registrations = [42]
+    expect(() => parseRegistrationFile(payload)).toThrow(
+      'registrations[0] must be an object',
+    )
+  })
+
+  it('throws when agentRegistry is missing from registration binding', () => {
+    const payload = validPayload()
+    payload.registrations = [{ agentId: 1 }]
+    expect(() => parseRegistrationFile(payload)).toThrow(
+      'agentRegistry must be a string',
+    )
+  })
+
+  it('throws when agentId has invalid type in registration binding', () => {
+    const payload = validPayload()
+    payload.registrations = [
+      { agentId: true, agentRegistry: 'eip155:8453:0xabc' },
+    ]
+    expect(() => parseRegistrationFile(payload)).toThrow(
+      'agentId must be a string, number, or bigint',
+    )
+  })
+
+  it('does not mutate the input object', () => {
+    const payload = validPayload()
+    payload.registrations = [
+      { agentId: 42, agentRegistry: 'eip155:8453:0xabc' },
+    ]
+    parseRegistrationFile(payload)
+    expect(
+      (payload.registrations as Array<Record<string, unknown>>)[0].agentId,
+    ).toBe(42)
+  })
+
   it('passes through non-spec fields without validation', () => {
     const payload = validPayload()
     payload.x402Support = true

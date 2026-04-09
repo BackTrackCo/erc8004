@@ -14,7 +14,7 @@ export function parseRegistrationFile(json: unknown): AgentRegistrationFile {
     throw new Error('Agent Registration File must be a JSON object')
   }
 
-  const obj = json as Record<string, unknown>
+  let obj = json as Record<string, unknown>
 
   if (obj.type !== REGISTRATION_TYPE) {
     throw new Error(
@@ -53,10 +53,16 @@ export function parseRegistrationFile(json: unknown): AgentRegistrationFile {
     }
   }
 
-  // Coerce registrations[].agentId to bigint (JSON.parse produces number)
+  // Coerce registrations[].agentId to bigint without mutating the input
   if (obj.registrations) {
-    for (const binding of obj.registrations as Array<Record<string, unknown>>) {
-      binding.agentId = BigInt(binding.agentId as number)
+    obj = {
+      ...obj,
+      registrations: (obj.registrations as Array<Record<string, unknown>>).map(
+        (b) => ({
+          ...b,
+          agentId: BigInt(b.agentId as string | number | bigint),
+        }),
+      ),
     }
   }
 
