@@ -349,7 +349,7 @@ describe('fetchRegistrationFile', () => {
 
     expect(fetchSpy).toHaveBeenCalledTimes(1)
     const callInit = fetchSpy.mock.calls[0][1] as RequestInit
-    expect(callInit.signal).toBeDefined()
+    expect(callInit.signal).toBeInstanceOf(AbortSignal)
   })
 
   it('throws when response body exceeds size limit', async () => {
