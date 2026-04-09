@@ -139,10 +139,19 @@ describe('parseRegistrationFile', () => {
     )
   })
 
-  it('coerces registrations agentId to bigint', () => {
+  it('coerces registrations agentId from number to bigint', () => {
     const payload = validPayload()
     payload.registrations = [
       { agentId: 42, agentRegistry: 'eip155:8453:0xabc' },
+    ]
+    const result = parseRegistrationFile(payload)
+    expect(result.registrations![0].agentId).toBe(42n)
+  })
+
+  it('coerces registrations agentId from string to bigint (spec format)', () => {
+    const payload = validPayload()
+    payload.registrations = [
+      { agentId: '42', agentRegistry: 'eip155:8453:0xabc' },
     ]
     const result = parseRegistrationFile(payload)
     expect(result.registrations![0].agentId).toBe(42n)

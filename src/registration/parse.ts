@@ -85,10 +85,11 @@ function validateRegistrationBinding(entry: unknown, index: number): void {
   const binding = entry as Record<string, unknown>
   if (
     typeof binding.agentId !== 'bigint' &&
-    typeof binding.agentId !== 'number'
+    typeof binding.agentId !== 'number' &&
+    typeof binding.agentId !== 'string'
   ) {
     throw new Error(
-      `registrations[${index}].agentId must be a number or bigint`,
+      `registrations[${index}].agentId must be a string, number, or bigint`,
     )
   }
   if (typeof binding.agentRegistry !== 'string') {
