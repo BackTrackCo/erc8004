@@ -9,10 +9,9 @@ export interface AgentRegistrationFile {
   description: string
   image: string
   services: ServiceEntry[]
-  x402Support?: boolean
   active?: boolean
   registrations?: RegistrationBinding[]
-  supportedTrust?: string[]
+  [key: string]: unknown
 }
 
 export interface ServiceEntry {

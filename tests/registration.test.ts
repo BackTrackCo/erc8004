@@ -107,14 +107,6 @@ describe('parseRegistrationFile', () => {
     }
   })
 
-  it('throws when x402Support is present but not boolean', () => {
-    const payload = validPayload()
-    payload.x402Support = 'yes'
-    expect(() => parseRegistrationFile(payload)).toThrow(
-      '"x402Support" must be a boolean',
-    )
-  })
-
   it('throws when active is present but not boolean', () => {
     const payload = validPayload()
     payload.active = 1
@@ -131,12 +123,15 @@ describe('parseRegistrationFile', () => {
     )
   })
 
-  it('throws when supportedTrust contains non-strings', () => {
+  it('passes through non-spec fields without validation', () => {
     const payload = validPayload()
-    payload.supportedTrust = [123]
-    expect(() => parseRegistrationFile(payload)).toThrow(
-      'supportedTrust[0] must be a string',
-    )
+    payload.x402Support = true
+    payload.supportedTrust = ['ERC-8004']
+    payload.customField = 42
+    const result = parseRegistrationFile(payload)
+    expect(result.x402Support).toBe(true)
+    expect(result.supportedTrust).toEqual(['ERC-8004'])
+    expect(result.customField).toBe(42)
   })
 
   it('coerces registrations agentId from number to bigint', () => {
@@ -171,20 +166,20 @@ describe('createRegistrationFile', () => {
     expect(file.type).toBe(SPEC_TYPE)
   })
 
-  it('passes through optional fields', () => {
+  it('passes through optional and extension fields', () => {
     const file = createRegistrationFile({
       name: 'My Agent',
       description: 'An agent',
       image: 'https://example.com/icon.png',
       services: [{ name: 'web', endpoint: 'https://example.com' }],
-      x402Support: true,
       active: false,
       registrations: [{ agentId: 42n, agentRegistry: 'eip155:8453:0xabc' }],
+      x402Support: true,
       supportedTrust: ['ERC-8004'],
     })
-    expect(file.x402Support).toBe(true)
     expect(file.active).toBe(false)
     expect(file.registrations).toHaveLength(1)
+    expect(file.x402Support).toBe(true)
     expect(file.supportedTrust).toEqual(['ERC-8004'])
   })
 
@@ -195,10 +190,8 @@ describe('createRegistrationFile', () => {
       image: 'https://example.com/icon.png',
       services: [{ name: 'web', endpoint: 'https://example.com' }],
     })
-    expect(file.x402Support).toBeUndefined()
     expect(file.active).toBeUndefined()
     expect(file.registrations).toBeUndefined()
-    expect(file.supportedTrust).toBeUndefined()
   })
 })
 

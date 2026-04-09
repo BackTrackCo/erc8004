@@ -40,10 +40,6 @@ export function parseRegistrationFile(json: unknown): AgentRegistrationFile {
     validateServiceEntry(obj.services[i], i)
   }
 
-  if (obj.x402Support !== undefined && typeof obj.x402Support !== 'boolean') {
-    throw new Error('"x402Support" must be a boolean when present')
-  }
-
   if (obj.active !== undefined && typeof obj.active !== 'boolean') {
     throw new Error('"active" must be a boolean when present')
   }
@@ -54,17 +50,6 @@ export function parseRegistrationFile(json: unknown): AgentRegistrationFile {
     }
     for (let i = 0; i < obj.registrations.length; i++) {
       validateRegistrationBinding(obj.registrations[i], i)
-    }
-  }
-
-  if (obj.supportedTrust !== undefined) {
-    if (!Array.isArray(obj.supportedTrust)) {
-      throw new Error('"supportedTrust" must be an array when present')
-    }
-    for (let i = 0; i < obj.supportedTrust.length; i++) {
-      if (typeof obj.supportedTrust[i] !== 'string') {
-        throw new Error(`supportedTrust[${i}] must be a string`)
-      }
     }
   }
 

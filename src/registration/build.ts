@@ -10,5 +10,5 @@ import { REGISTRATION_TYPE } from './types.js'
 export function createRegistrationFile(
   params: CreateRegistrationFileParameters,
 ): AgentRegistrationFile {
-  return { type: REGISTRATION_TYPE, ...params }
+  return { type: REGISTRATION_TYPE, ...params } as AgentRegistrationFile
 }
