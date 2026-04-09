@@ -25,14 +25,14 @@ export async function fetchRegistrationFile(
     )
   }
 
-  const contentLength = response.headers.get('content-length')
-  if (contentLength && Number(contentLength) > 1_048_576) {
+  const text = await response.text()
+  if (text.length > 1_048_576) {
     throw new Error('Registration file exceeds 1 MB size limit')
   }
 
   let json: unknown
   try {
-    json = await response.json()
+    json = JSON.parse(text)
   } catch {
     throw new Error('Response is not valid JSON')
   }

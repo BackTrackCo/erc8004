@@ -8,7 +8,7 @@ import { REGISTRATION_TYPE } from './types.js'
  * Build a valid Agent Registration File with the spec `type` set automatically.
  */
 export function createRegistrationFile(
-  params: CreateRegistrationFileParameters,
+  parameters: CreateRegistrationFileParameters,
 ): AgentRegistrationFile {
-  return { type: REGISTRATION_TYPE, ...params } as AgentRegistrationFile
+  return { type: REGISTRATION_TYPE, ...parameters } as AgentRegistrationFile
 }

@@ -83,6 +83,11 @@ function validateRegistrationBinding(entry: unknown, index: number): void {
       `registrations[${index}].agentId must be a string, number, or bigint`,
     )
   }
+  if (typeof binding.agentId === 'string' && !/^\d+$/.test(binding.agentId)) {
+    throw new Error(
+      `registrations[${index}].agentId string must be a non-negative integer, got "${binding.agentId}"`,
+    )
+  }
   if (typeof binding.agentRegistry !== 'string') {
     throw new Error(`registrations[${index}].agentRegistry must be a string`)
   }

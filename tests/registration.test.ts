@@ -1,4 +1,3 @@
-import type { PublicClient } from 'viem'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createRegistrationFile } from '../src/registration/build.js'
 import { fetchRegistrationFile } from '../src/registration/fetch.js'
@@ -6,13 +5,12 @@ import { parseRegistrationFile } from '../src/registration/parse.js'
 import { resolveServiceEndpoint } from '../src/registration/resolve.js'
 import { findService, findServices } from '../src/registration/services.js'
 import type { AgentRegistrationFile } from '../src/registration/types.js'
-import { ADDR_A, REGISTRY } from './setup/mocks.js'
-
-const SPEC_TYPE = 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1'
+import { REGISTRATION_TYPE } from '../src/registration/types.js'
+import { ADDR_A, mockPublic, REGISTRY } from './setup/mocks.js'
 
 function validPayload(): Record<string, unknown> {
   return {
-    type: SPEC_TYPE,
+    type: REGISTRATION_TYPE,
     name: 'My Agent',
     description: 'A test agent',
     image: 'https://example.com/icon.png',
@@ -28,7 +26,7 @@ function validPayload(): Record<string, unknown> {
 describe('parseRegistrationFile', () => {
   it('accepts a valid registration file', () => {
     const result = parseRegistrationFile(validPayload())
-    expect(result.type).toBe(SPEC_TYPE)
+    expect(result.type).toBe(REGISTRATION_TYPE)
     expect(result.name).toBe('My Agent')
     expect(result.services).toHaveLength(2)
   })
@@ -149,6 +147,16 @@ describe('parseRegistrationFile', () => {
     )
   })
 
+  it('throws when agentId string is non-numeric', () => {
+    const payload = validPayload()
+    payload.registrations = [
+      { agentId: 'abc', agentRegistry: 'eip155:8453:0xabc' },
+    ]
+    expect(() => parseRegistrationFile(payload)).toThrow(
+      'agentId string must be a non-negative integer',
+    )
+  })
+
   it('does not mutate the input object', () => {
     const payload = validPayload()
     payload.registrations = [
@@ -188,6 +196,15 @@ describe('parseRegistrationFile', () => {
     const result = parseRegistrationFile(payload)
     expect(result.registrations![0].agentId).toBe(42n)
   })
+
+  it('preserves registrations agentId already a bigint', () => {
+    const payload = validPayload()
+    payload.registrations = [
+      { agentId: 42n, agentRegistry: 'eip155:8453:0xabc' },
+    ]
+    const result = parseRegistrationFile(payload)
+    expect(result.registrations![0].agentId).toBe(42n)
+  })
 })
 
 // --- createRegistrationFile ---
@@ -200,7 +217,7 @@ describe('createRegistrationFile', () => {
       image: 'https://example.com/icon.png',
       services: [{ name: 'web', endpoint: 'https://example.com' }],
     })
-    expect(file.type).toBe(SPEC_TYPE)
+    expect(file.type).toBe(REGISTRATION_TYPE)
   })
 
   it('passes through optional and extension fields', () => {
@@ -236,7 +253,7 @@ describe('createRegistrationFile', () => {
 
 describe('findService', () => {
   const file: AgentRegistrationFile = {
-    type: SPEC_TYPE,
+    type: REGISTRATION_TYPE,
     name: 'My Agent',
     description: 'An agent',
     image: 'https://example.com/icon.png',
@@ -259,7 +276,7 @@ describe('findService', () => {
 
 describe('findServices', () => {
   const file: AgentRegistrationFile = {
-    type: SPEC_TYPE,
+    type: REGISTRATION_TYPE,
     name: 'My Agent',
     description: 'An agent',
     image: 'https://example.com/icon.png',
@@ -287,16 +304,16 @@ describe('findServices', () => {
 describe('fetchRegistrationFile', () => {
   afterEach(() => vi.unstubAllGlobals())
 
+  function mockFetch(body: string, init?: { ok?: boolean; status?: number }) {
+    return vi.fn().mockResolvedValue({
+      ok: init?.ok ?? true,
+      status: init?.status ?? 200,
+      text: () => Promise.resolve(body),
+    })
+  }
+
   it('fetches and parses a valid registration file', async () => {
-    const payload = validPayload()
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        headers: new Headers(),
-        json: () => Promise.resolve(payload),
-      }),
-    )
+    vi.stubGlobal('fetch', mockFetch(JSON.stringify(validPayload())))
 
     const result = await fetchRegistrationFile('https://example.com/agent.json')
     expect(result.name).toBe('My Agent')
@@ -309,10 +326,7 @@ describe('fetchRegistrationFile', () => {
   })
 
   it('throws on non-200 response', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({ ok: false, status: 404 }),
-    )
+    vi.stubGlobal('fetch', mockFetch('', { ok: false, status: 404 }))
 
     await expect(
       fetchRegistrationFile('https://example.com/agent.json'),
@@ -320,14 +334,7 @@ describe('fetchRegistrationFile', () => {
   })
 
   it('throws on invalid JSON response', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        headers: new Headers(),
-        json: () => Promise.reject(new Error('Unexpected token')),
-      }),
-    )
+    vi.stubGlobal('fetch', mockFetch('not json'))
 
     await expect(
       fetchRegistrationFile('https://example.com/agent.json'),
@@ -335,30 +342,18 @@ describe('fetchRegistrationFile', () => {
   })
 
   it('passes abort signal to fetch', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockImplementation((_url: string, init?: RequestInit) => {
-        expect(init?.signal).toBeDefined()
-        return Promise.resolve({
-          ok: true,
-          headers: new Headers(),
-          json: () => Promise.resolve(validPayload()),
-        })
-      }),
-    )
+    const fetchSpy = mockFetch(JSON.stringify(validPayload()))
+    vi.stubGlobal('fetch', fetchSpy)
 
     await fetchRegistrationFile('https://example.com/agent.json')
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1)
+    const callInit = fetchSpy.mock.calls[0][1] as RequestInit
+    expect(callInit.signal).toBeDefined()
   })
 
-  it('throws when content-length exceeds limit', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        headers: new Headers({ 'content-length': '2000000' }),
-        json: () => Promise.resolve(validPayload()),
-      }),
-    )
+  it('throws when response body exceeds size limit', async () => {
+    vi.stubGlobal('fetch', mockFetch('x'.repeat(1_048_577)))
 
     await expect(
       fetchRegistrationFile('https://example.com/huge'),
@@ -373,34 +368,27 @@ describe('resolveServiceEndpoint', () => {
 
   const registrationPayload = validPayload()
 
-  function mockReadContract(overrides: Partial<Record<string, unknown>> = {}) {
-    const defaults: Record<string, unknown> = {
-      ownerOf: ADDR_A,
-      getAgentWallet: ADDR_A,
-      tokenURI: 'https://example.com/agent.json',
-      ...overrides,
-    }
-    return {
-      chain: { id: 8453 },
-      readContract: vi.fn(({ functionName }: { functionName: string }) => {
-        if (functionName in defaults)
-          return Promise.resolve(defaults[functionName])
-        return Promise.reject(new Error(`unexpected: ${functionName}`))
-      }),
-    } as unknown as PublicClient
-  }
-
-  it('resolves an endpoint through the full pipeline', async () => {
+  function stubFetch(body: string, init?: { ok?: boolean; status?: number }) {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
-        ok: true,
-        headers: new Headers(),
-        json: () => Promise.resolve(registrationPayload),
+        ok: init?.ok ?? true,
+        status: init?.status ?? 200,
+        text: () => Promise.resolve(body),
       }),
     )
+  }
 
-    const result = await resolveServiceEndpoint(mockReadContract(), {
+  it('resolves an endpoint through the full pipeline', async () => {
+    stubFetch(JSON.stringify(registrationPayload))
+
+    const client = mockPublic({
+      ownerOf: ADDR_A,
+      getAgentWallet: ADDR_A,
+      tokenURI: 'https://example.com/agent.json',
+    })
+
+    const result = await resolveServiceEndpoint(client, {
       agentId: 42n,
       serviceName: 'web',
       registryAddress: REGISTRY,
@@ -415,17 +403,16 @@ describe('resolveServiceEndpoint', () => {
   })
 
   it('throws when the service is not found', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        headers: new Headers(),
-        json: () => Promise.resolve(registrationPayload),
-      }),
-    )
+    stubFetch(JSON.stringify(registrationPayload))
+
+    const client = mockPublic({
+      ownerOf: ADDR_A,
+      getAgentWallet: ADDR_A,
+      tokenURI: 'https://example.com/agent.json',
+    })
 
     await expect(
-      resolveServiceEndpoint(mockReadContract(), {
+      resolveServiceEndpoint(client, {
         agentId: 42n,
         serviceName: 'nonexistent',
         registryAddress: REGISTRY,
@@ -434,8 +421,14 @@ describe('resolveServiceEndpoint', () => {
   })
 
   it('throws when agent has no URI set', async () => {
+    const client = mockPublic({
+      ownerOf: ADDR_A,
+      getAgentWallet: ADDR_A,
+      tokenURI: '',
+    })
+
     await expect(
-      resolveServiceEndpoint(mockReadContract({ tokenURI: '' }), {
+      resolveServiceEndpoint(client, {
         agentId: 42n,
         serviceName: 'web',
         registryAddress: REGISTRY,
@@ -444,13 +437,16 @@ describe('resolveServiceEndpoint', () => {
   })
 
   it('includes agent ID in fetch error messages', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({ ok: false, status: 500 }),
-    )
+    stubFetch('', { ok: false, status: 500 })
+
+    const client = mockPublic({
+      ownerOf: ADDR_A,
+      getAgentWallet: ADDR_A,
+      tokenURI: 'https://example.com/agent.json',
+    })
 
     await expect(
-      resolveServiceEndpoint(mockReadContract(), {
+      resolveServiceEndpoint(client, {
         agentId: 42n,
         serviceName: 'web',
         registryAddress: REGISTRY,
