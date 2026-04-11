@@ -31,7 +31,9 @@ export async function resolveServiceEndpoint(
 
   let file: AgentRegistrationFile
   try {
-    file = await fetchRegistrationFile(agent.agentURI)
+    file = await fetchRegistrationFile(agent.agentURI, {
+      ipfsGateway: parameters.ipfsGateway,
+    })
   } catch (error) {
     throw new Error(
       `Agent ${parameters.agentId}: ${error instanceof Error ? error.message : String(error)}`,
