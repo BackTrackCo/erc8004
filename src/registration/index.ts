@@ -6,6 +6,7 @@ export { findService, findServices } from './services.js'
 export {
   type AgentRegistrationFile,
   type CreateRegistrationFileParameters,
+  type FetchRegistrationFileOptions,
   REGISTRATION_TYPE,
   type RegistrationBinding,
   type ResolvedServiceEndpoint,

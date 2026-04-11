@@ -319,10 +319,144 @@ describe('fetchRegistrationFile', () => {
     expect(result.name).toBe('My Agent')
   })
 
-  it('throws on non-HTTPS URL', async () => {
+  it('throws on unsupported URI scheme', async () => {
     await expect(
       fetchRegistrationFile('http://example.com/agent.json'),
-    ).rejects.toThrow('Only HTTPS URIs are supported')
+    ).rejects.toThrow('Unsupported URI scheme')
+    await expect(
+      fetchRegistrationFile('ftp://example.com/file'),
+    ).rejects.toThrow('Unsupported URI scheme')
+  })
+
+  // --- data: URIs ---
+
+  it('parses base64-encoded data URI', async () => {
+    const json = JSON.stringify(validPayload())
+    const encoded = btoa(json)
+    const result = await fetchRegistrationFile(
+      `data:application/json;base64,${encoded}`,
+    )
+    expect(result.name).toBe('My Agent')
+  })
+
+  it('parses URL-encoded data URI', async () => {
+    const json = JSON.stringify(validPayload())
+    const encoded = encodeURIComponent(json)
+    const result = await fetchRegistrationFile(
+      `data:application/json,${encoded}`,
+    )
+    expect(result.name).toBe('My Agent')
+  })
+
+  it('parses data URI with charset parameter', async () => {
+    const json = JSON.stringify(validPayload())
+    const encoded = btoa(json)
+    const result = await fetchRegistrationFile(
+      `data:application/json;charset=utf-8;base64,${encoded}`,
+    )
+    expect(result.name).toBe('My Agent')
+  })
+
+  it('throws on data URI with wrong MIME type', async () => {
+    await expect(
+      fetchRegistrationFile('data:text/plain;base64,aGVsbG8='),
+    ).rejects.toThrow('application/json MIME type')
+  })
+
+  it('throws on data URI with malformed base64', async () => {
+    await expect(
+      fetchRegistrationFile('data:application/json;base64,!!!invalid'),
+    ).rejects.toThrow('Failed to decode')
+  })
+
+  it('throws on data URI with invalid JSON', async () => {
+    const encoded = btoa('not json')
+    await expect(
+      fetchRegistrationFile(`data:application/json;base64,${encoded}`),
+    ).rejects.toThrow('not valid JSON')
+  })
+
+  it('throws on data URI exceeding size limit', async () => {
+    const big = JSON.stringify({
+      ...validPayload(),
+      pad: 'x'.repeat(1_048_577),
+    })
+    const encoded = btoa(big)
+    await expect(
+      fetchRegistrationFile(`data:application/json;base64,${encoded}`),
+    ).rejects.toThrow('exceeds 1 MB')
+  })
+
+  it('throws on data URI missing comma', async () => {
+    await expect(
+      fetchRegistrationFile('data:application/json;base64'),
+    ).rejects.toThrow('missing comma')
+  })
+
+  // --- ipfs:// URIs ---
+
+  it('rewrites ipfs:// to default gateway', async () => {
+    const fetchSpy = mockFetch(JSON.stringify(validPayload()))
+    vi.stubGlobal('fetch', fetchSpy)
+
+    await fetchRegistrationFile('ipfs://QmTest123')
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://ipfs.io/ipfs/QmTest123',
+      expect.anything(),
+    )
+  })
+
+  it('accepts custom ipfsGateway', async () => {
+    const fetchSpy = mockFetch(JSON.stringify(validPayload()))
+    vi.stubGlobal('fetch', fetchSpy)
+
+    await fetchRegistrationFile('ipfs://QmTest123', {
+      ipfsGateway: 'https://gateway.pinata.cloud',
+    })
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://gateway.pinata.cloud/ipfs/QmTest123',
+      expect.anything(),
+    )
+  })
+
+  it('handles ipfs:// with path after CID', async () => {
+    const fetchSpy = mockFetch(JSON.stringify(validPayload()))
+    vi.stubGlobal('fetch', fetchSpy)
+
+    await fetchRegistrationFile('ipfs://QmTest123/metadata.json')
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://ipfs.io/ipfs/QmTest123/metadata.json',
+      expect.anything(),
+    )
+  })
+
+  it('throws on ipfs:// with empty CID', async () => {
+    await expect(fetchRegistrationFile('ipfs://')).rejects.toThrow(
+      'empty CID or path traversal',
+    )
+  })
+
+  it('throws on ipfs:// with path traversal', async () => {
+    await expect(
+      fetchRegistrationFile('ipfs://QmFoo/../../../other'),
+    ).rejects.toThrow('empty CID or path traversal')
+  })
+
+  it('handles ipfsGateway with trailing slash', async () => {
+    const fetchSpy = mockFetch(JSON.stringify(validPayload()))
+    vi.stubGlobal('fetch', fetchSpy)
+
+    await fetchRegistrationFile('ipfs://QmTest123', {
+      ipfsGateway: 'https://ipfs.io/',
+    })
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://ipfs.io/ipfs/QmTest123',
+      expect.anything(),
+    )
   })
 
   it('throws on non-200 response', async () => {
@@ -434,6 +568,59 @@ describe('resolveServiceEndpoint', () => {
         registryAddress: REGISTRY,
       }),
     ).rejects.toThrow('Agent 42 has no URI set')
+  })
+
+  it('passes ipfsGateway through to fetch for ipfs:// URIs', async () => {
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve(JSON.stringify(registrationPayload)),
+    })
+    vi.stubGlobal('fetch', fetchSpy)
+
+    const client = mockPublic({
+      ownerOf: ADDR_A,
+      getAgentWallet: ADDR_A,
+      tokenURI: 'ipfs://QmTest123',
+    })
+
+    await resolveServiceEndpoint(client, {
+      agentId: 42n,
+      serviceName: 'web',
+      registryAddress: REGISTRY,
+      ipfsGateway: 'https://gateway.pinata.cloud',
+    })
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://gateway.pinata.cloud/ipfs/QmTest123',
+      expect.anything(),
+    )
+  })
+
+  it('uses default IPFS gateway when ipfsGateway is omitted', async () => {
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve(JSON.stringify(registrationPayload)),
+    })
+    vi.stubGlobal('fetch', fetchSpy)
+
+    const client = mockPublic({
+      ownerOf: ADDR_A,
+      getAgentWallet: ADDR_A,
+      tokenURI: 'ipfs://QmTest123',
+    })
+
+    await resolveServiceEndpoint(client, {
+      agentId: 42n,
+      serviceName: 'web',
+      registryAddress: REGISTRY,
+    })
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://ipfs.io/ipfs/QmTest123',
+      expect.anything(),
+    )
   })
 
   it('includes agent ID in fetch error messages', async () => {

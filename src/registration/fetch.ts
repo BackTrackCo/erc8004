@@ -1,21 +1,49 @@
 import { parseRegistrationFile } from './parse.js'
-import type { AgentRegistrationFile } from './types.js'
+import type {
+  AgentRegistrationFile,
+  FetchRegistrationFileOptions,
+} from './types.js'
+
+const DEFAULT_IPFS_GATEWAY = 'https://ipfs.io'
+const MAX_REGISTRATION_FILE_SIZE = 1_048_576
 
 /**
- * Fetch and validate an Agent Registration File from an HTTPS URL.
+ * Fetch and validate an Agent Registration File from a URI.
  *
- * Uses `globalThis.fetch` — no external HTTP dependencies required.
+ * Supported schemes:
+ * - `https://` — fetched via `globalThis.fetch`
+ * - `data:application/json;base64,...` — decoded inline (fully on-chain storage)
+ * - `data:application/json,...` — URL-decoded inline
+ * - `ipfs://<cid>` — resolved via public IPFS gateway (configurable)
  *
- * @throws on non-HTTPS URL, non-200 response, non-JSON body, or invalid schema
+ * @throws on unsupported scheme, non-200 response, non-JSON body, or invalid schema
  */
 export async function fetchRegistrationFile(
   uri: string,
+  options?: FetchRegistrationFileOptions,
 ): Promise<AgentRegistrationFile> {
-  if (!uri.startsWith('https://')) {
-    throw new Error(`Only HTTPS URIs are supported, got: ${uri.slice(0, 40)}`)
+  if (uri.startsWith('data:')) {
+    return parseDataUri(uri)
   }
 
-  const response = await globalThis.fetch(uri, {
+  let fetchUrl: string
+  if (uri.startsWith('ipfs://')) {
+    const cidPath = uri.slice(7) // strip "ipfs://"
+    if (!cidPath || cidPath.split('/').some((s) => s === '..' || s === '.')) {
+      throw new Error('Invalid IPFS URI: empty CID or path traversal')
+    }
+    const gateway = options?.ipfsGateway ?? DEFAULT_IPFS_GATEWAY
+    const base = gateway.endsWith('/') ? gateway.slice(0, -1) : gateway
+    fetchUrl = `${base}/ipfs/${cidPath}`
+  } else if (uri.startsWith('https://')) {
+    fetchUrl = uri
+  } else {
+    throw new Error(
+      `Unsupported URI scheme (expected https, data, or ipfs): ${uri.slice(0, 40)}`,
+    )
+  }
+
+  const response = await globalThis.fetch(fetchUrl, {
     signal: AbortSignal.timeout(10_000),
   })
 
@@ -26,7 +54,7 @@ export async function fetchRegistrationFile(
   }
 
   const text = await response.text()
-  if (text.length > 1_048_576) {
+  if (text.length > MAX_REGISTRATION_FILE_SIZE) {
     throw new Error('Registration file exceeds 1 MB size limit')
   }
 
@@ -35,6 +63,57 @@ export async function fetchRegistrationFile(
     json = JSON.parse(text)
   } catch {
     throw new Error('Response is not valid JSON')
+  }
+
+  return parseRegistrationFile(json)
+}
+
+// ---------------------------------------------------------------------------
+// data: URI parsing
+// ---------------------------------------------------------------------------
+
+function parseDataUri(uri: string): AgentRegistrationFile {
+  const commaIndex = uri.indexOf(',')
+  if (commaIndex === -1) {
+    throw new Error('Malformed data URI: missing comma separator')
+  }
+
+  const header = uri.slice(5, commaIndex) // strip "data:" prefix
+  const payload = uri.slice(commaIndex + 1)
+
+  // Validate MIME type — accept application/json with optional charset
+  const mimeEnd = header.indexOf(';')
+  const mime = mimeEnd === -1 ? header : header.slice(0, mimeEnd)
+  if (mime !== 'application/json') {
+    throw new Error(
+      `data URI must have application/json MIME type, got: ${mime}`,
+    )
+  }
+
+  const isBase64 = header.endsWith(';base64')
+
+  let decoded: string
+  try {
+    decoded = isBase64
+      ? new TextDecoder().decode(
+          Uint8Array.from(atob(payload), (c) => c.charCodeAt(0)),
+        )
+      : decodeURIComponent(payload)
+  } catch {
+    throw new Error(
+      `Failed to decode data URI (${isBase64 ? 'base64' : 'percent-encoded'})`,
+    )
+  }
+
+  if (decoded.length > MAX_REGISTRATION_FILE_SIZE) {
+    throw new Error('Registration file exceeds 1 MB size limit')
+  }
+
+  let json: unknown
+  try {
+    json = JSON.parse(decoded)
+  } catch {
+    throw new Error('data URI content is not valid JSON')
   }
 
   return parseRegistrationFile(json)
