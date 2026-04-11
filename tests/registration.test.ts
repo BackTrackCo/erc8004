@@ -364,9 +364,11 @@ describe('fetchRegistrationFile', () => {
   })
 
   it('throws on data URI with malformed base64', async () => {
+    // Buffer.from silently ignores invalid base64 chars, so the decoded
+    // garbage fails at JSON.parse rather than at the decode step.
     await expect(
       fetchRegistrationFile('data:application/json;base64,!!!invalid'),
-    ).rejects.toThrow('Failed to decode')
+    ).rejects.toThrow('not valid JSON')
   })
 
   it('throws on data URI with invalid JSON', async () => {
@@ -556,6 +558,59 @@ describe('resolveServiceEndpoint', () => {
         registryAddress: REGISTRY,
       }),
     ).rejects.toThrow('Agent 42 has no URI set')
+  })
+
+  it('passes ipfsGateway through to fetch for ipfs:// URIs', async () => {
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve(JSON.stringify(registrationPayload)),
+    })
+    vi.stubGlobal('fetch', fetchSpy)
+
+    const client = mockPublic({
+      ownerOf: ADDR_A,
+      getAgentWallet: ADDR_A,
+      tokenURI: 'ipfs://QmTest123',
+    })
+
+    await resolveServiceEndpoint(client, {
+      agentId: 42n,
+      serviceName: 'web',
+      registryAddress: REGISTRY,
+      ipfsGateway: 'https://gateway.pinata.cloud',
+    })
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://gateway.pinata.cloud/ipfs/QmTest123',
+      expect.anything(),
+    )
+  })
+
+  it('uses default IPFS gateway when ipfsGateway is omitted', async () => {
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve(JSON.stringify(registrationPayload)),
+    })
+    vi.stubGlobal('fetch', fetchSpy)
+
+    const client = mockPublic({
+      ownerOf: ADDR_A,
+      getAgentWallet: ADDR_A,
+      tokenURI: 'ipfs://QmTest123',
+    })
+
+    await resolveServiceEndpoint(client, {
+      agentId: 42n,
+      serviceName: 'web',
+      registryAddress: REGISTRY,
+    })
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://ipfs.io/ipfs/QmTest123',
+      expect.anything(),
+    )
   })
 
   it('includes agent ID in fetch error messages', async () => {

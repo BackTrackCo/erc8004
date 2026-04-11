@@ -31,12 +31,16 @@ export type CreateRegistrationFileParameters = Omit<
   'type'
 >
 
-export interface ResolveServiceEndpointParameters {
+export interface FetchRegistrationFileOptions {
+  /** IPFS gateway base URL. Default: `https://ipfs.io`. */
+  ipfsGateway?: string
+}
+
+export interface ResolveServiceEndpointParameters
+  extends FetchRegistrationFileOptions {
   agentId: bigint
   serviceName: string
   registryAddress?: Address
-  /** IPFS gateway base URL for `ipfs://` agent URIs. Default: `https://ipfs.io`. */
-  ipfsGateway?: string
 }
 
 export interface ResolvedServiceEndpoint {

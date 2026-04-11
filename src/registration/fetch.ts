@@ -1,12 +1,11 @@
 import { parseRegistrationFile } from './parse.js'
-import type { AgentRegistrationFile } from './types.js'
+import type {
+  AgentRegistrationFile,
+  FetchRegistrationFileOptions,
+} from './types.js'
 
 const DEFAULT_IPFS_GATEWAY = 'https://ipfs.io'
-
-export interface FetchRegistrationFileOptions {
-  /** IPFS gateway base URL. Default: `https://ipfs.io`. */
-  ipfsGateway?: string
-}
+const MAX_REGISTRATION_FILE_SIZE = 1_048_576
 
 /**
  * Fetch and validate an Agent Registration File from a URI.
@@ -52,7 +51,7 @@ export async function fetchRegistrationFile(
   }
 
   const text = await response.text()
-  if (text.length > 1_048_576) {
+  if (text.length > MAX_REGISTRATION_FILE_SIZE) {
     throw new Error('Registration file exceeds 1 MB size limit')
   }
 
@@ -92,14 +91,16 @@ function parseDataUri(uri: string): AgentRegistrationFile {
 
   let decoded: string
   try {
-    decoded = isBase64 ? atob(payload) : decodeURIComponent(payload)
+    decoded = isBase64
+      ? Buffer.from(payload, 'base64').toString('utf8')
+      : decodeURIComponent(payload)
   } catch {
     throw new Error(
       `Failed to decode data URI (${isBase64 ? 'base64' : 'percent-encoded'})`,
     )
   }
 
-  if (decoded.length > 1_048_576) {
+  if (decoded.length > MAX_REGISTRATION_FILE_SIZE) {
     throw new Error('Registration file exceeds 1 MB size limit')
   }
 
