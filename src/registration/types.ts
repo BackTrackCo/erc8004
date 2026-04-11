@@ -35,8 +35,6 @@ export interface ResolveServiceEndpointParameters {
   agentId: bigint
   serviceName: string
   registryAddress?: Address
-  /** IPFS gateway base URL for `ipfs://` agent URIs. Default: `https://ipfs.io`. */
-  ipfsGateway?: string
 }
 
 export interface ResolvedServiceEndpoint {

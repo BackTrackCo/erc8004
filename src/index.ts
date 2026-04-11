@@ -43,7 +43,6 @@ export {
 export type {
   AgentRegistrationFile,
   CreateRegistrationFileParameters,
-  FetchRegistrationFileOptions,
   RegistrationBinding,
   ResolvedServiceEndpoint,
   ResolveServiceEndpointParameters,
