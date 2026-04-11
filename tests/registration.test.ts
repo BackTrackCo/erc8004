@@ -364,11 +364,9 @@ describe('fetchRegistrationFile', () => {
   })
 
   it('throws on data URI with malformed base64', async () => {
-    // Buffer.from silently ignores invalid base64 chars, so the decoded
-    // garbage fails at JSON.parse rather than at the decode step.
     await expect(
       fetchRegistrationFile('data:application/json;base64,!!!invalid'),
-    ).rejects.toThrow('not valid JSON')
+    ).rejects.toThrow('Failed to decode')
   })
 
   it('throws on data URI with invalid JSON', async () => {
@@ -433,6 +431,18 @@ describe('fetchRegistrationFile', () => {
       'https://ipfs.io/ipfs/QmTest123/metadata.json',
       expect.anything(),
     )
+  })
+
+  it('throws on ipfs:// with empty CID', async () => {
+    await expect(fetchRegistrationFile('ipfs://')).rejects.toThrow(
+      'empty CID or path traversal',
+    )
+  })
+
+  it('throws on ipfs:// with path traversal', async () => {
+    await expect(
+      fetchRegistrationFile('ipfs://QmFoo/../../../other'),
+    ).rejects.toThrow('empty CID or path traversal')
   })
 
   it('handles ipfsGateway with trailing slash', async () => {

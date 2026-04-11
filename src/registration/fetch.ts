@@ -28,10 +28,13 @@ export async function fetchRegistrationFile(
 
   let fetchUrl: string
   if (uri.startsWith('ipfs://')) {
+    const cidPath = uri.slice(7) // strip "ipfs://"
+    if (!cidPath || cidPath.split('/').some((s) => s === '..' || s === '.')) {
+      throw new Error('Invalid IPFS URI: empty CID or path traversal')
+    }
     const gateway = options?.ipfsGateway ?? DEFAULT_IPFS_GATEWAY
     const base = gateway.endsWith('/') ? gateway.slice(0, -1) : gateway
-    const path = uri.slice(7) // strip "ipfs://"
-    fetchUrl = `${base}/ipfs/${path}`
+    fetchUrl = `${base}/ipfs/${cidPath}`
   } else if (uri.startsWith('https://')) {
     fetchUrl = uri
   } else {
@@ -92,7 +95,9 @@ function parseDataUri(uri: string): AgentRegistrationFile {
   let decoded: string
   try {
     decoded = isBase64
-      ? Buffer.from(payload, 'base64').toString('utf8')
+      ? new TextDecoder().decode(
+          Uint8Array.from(atob(payload), (c) => c.charCodeAt(0)),
+        )
       : decodeURIComponent(payload)
   } catch {
     throw new Error(
