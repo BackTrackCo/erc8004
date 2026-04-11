@@ -1,6 +1,6 @@
 {
   "name": "@x402r/erc8004",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Lightweight TypeScript SDK for ERC-8004 (Trustless Agents) — Identity and Reputation registries",
   "type": "module",
   "license": "Apache-2.0",

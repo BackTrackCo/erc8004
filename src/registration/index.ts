@@ -1,5 +1,8 @@
 export { createRegistrationFile } from './build.js'
-export { fetchRegistrationFile } from './fetch.js'
+export {
+  type FetchRegistrationFileOptions,
+  fetchRegistrationFile,
+} from './fetch.js'
 export { parseRegistrationFile } from './parse.js'
 export { resolveServiceEndpoint } from './resolve.js'
 export { findService, findServices } from './services.js'
